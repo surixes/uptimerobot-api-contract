@@ -1,6 +1,6 @@
 package edu.rutmiit.demo.uptimerobotrest.controllers;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +25,7 @@ public class AlertController implements AlertApi {
     private final AlertModelAssembler alertModelAssembler;
     private final PagedResourcesAssembler<AlertResponse> pagedAlertAssembler;
 
-    public AlertController(AlertService alertService, AlertModelAssembler alertModelAssembler, 
+    public AlertController(AlertService alertService, AlertModelAssembler alertModelAssembler,
             PagedResourcesAssembler<AlertResponse> pagedAlertAssembler) {
         this.alertService = alertService;
         this.alertModelAssembler = alertModelAssembler;
@@ -33,21 +33,14 @@ public class AlertController implements AlertApi {
     }
 
     @Override
-    public PagedModel<EntityModel<AlertResponse>> getAllAlerts(
-            Long alertId,
-            LocalDateTime dateOpen,
-            LocalDateTime dateClose,
-            AlertStatusEnum status,
-            String url,
-            int page,
-            int size) {
+    public PagedModel<EntityModel<AlertResponse>> getAllAlerts(Long alertId,
+            OffsetDateTime dateOpen, OffsetDateTime dateClose, AlertStatusEnum status, String url,
+            int page, int size) {
 
-        PagedResponse<AlertResponse> paged = alertService.findAll(alertId, dateOpen, dateClose, status, url, page, size);
-        Page<AlertResponse> springPage = new PageImpl<>(
-                paged.content(),
-                PageRequest.of(paged.pageNumber(), paged.pageSize()),
-                paged.totalElements()
-        );
+        PagedResponse<AlertResponse> paged =
+                alertService.findAll(alertId, dateOpen, dateClose, status, url, page, size);
+        Page<AlertResponse> springPage = new PageImpl<>(paged.content(),
+                PageRequest.of(paged.pageNumber(), paged.pageSize()), paged.totalElements());
         return pagedAlertAssembler.toModel(springPage, alertModelAssembler);
     }
 
@@ -93,5 +86,5 @@ public class AlertController implements AlertApi {
     public EntityModel<AlertResponse> patchAlert(Long id, PatchAlertRequest request) {
         return alertModelAssembler.toModel(alertService.patchAlert(id, request));
     }
-    
+
 }

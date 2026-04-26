@@ -24,7 +24,7 @@ public class CheckModelAssembler implements RepresentationModelAssembler<CheckRe
                 linkTo(methodOn(CheckController.class).runCheckNow(check.getId()))
                         .withRel("run-now"),
                 linkTo(methodOn(CheckController.class).getAlertsByCheckId(check.getId(), 0, 20,
-                        null, null, null)).withRel("alerts"));
+                        null, null, null, null)).withRel("alerts"));
 
         return model;
     }

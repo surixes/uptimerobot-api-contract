@@ -1,0 +1,316 @@
+scalar DateTime
+
+enum AlertStatus {
+  CREATED
+  NEW
+  ACKNOWLEDGED
+  RESOLVED
+  CLOSED
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+type Check {
+    id: ID!
+    name: String!
+    url: String!
+    method: String!
+    intervalSec: Int!
+    timeoutMs: Int!
+    enabled: Boolean!
+    expectedStatusCode: Int!
+    expectedResponseContains: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    lastResponseTimeMs: Int!
+    consecutiveFailures: Int!
+    alerts(page: Int = 0, size: Int = 20): AlertConnection!
+}
+
+type Alert {
+    id: ID!
+    status: AlertStatus!
+    severity: AlertSeverity!
+    message: String
+    details: String
+    createdAt: DateTime!
+    updatedAt: DateTime
+    acknowledgedAt: DateTime
+    acknowledgedBy: String
+    resolvedAt: DateTime
+}
+
+type PageInfo {
+  page: Int!
+  size: Int!
+  totalPages: Int!
+  last: Boolean!
+}
+
+type CheckConnection {
+  items: [Check!]!
+  pageInfo: PageInfo!
+  totalElements: Int!
+}
+
+type AlertConnection {
+  items: [Alert!]!
+  pageInfo: PageInfo!
+  totalElements: Int!
+}
+
+input CreateCheckInput {
+    name: String!
+    url: String!
+    method: String!
+    intervalSec: Int!
+    timeoutMs: Int!
+    enabled: Boolean!
+    expectedStatusCode: Int
+    expectedResponseContains: String
+}
+
+input UpdateCheckInput {
+    id: ID!
+    name: String!
+    url: String!
+    method: String!
+    intervalSec: Int!
+    timeoutMs: Int!
+    enabled: Boolean!
+    expectedStatusCode: Int!
+    expectedResponseContains: String!
+}
+
+input PatchCheckInput {
+    id: ID!
+    name: String
+    url: String
+    method: String
+    intervalSec: Int
+    timeoutMs: Int
+    enabled: Boolean
+    expectedStatusCode: Int
+    expectedResponseContains: String
+}
+
+input CreateAlertInput {
+    alertName: String!
+    severity: AlertSeverity!
+    message: String
+    details: String
+}
+
+input UpdateAlertInput {
+    id: ID!
+    alertName: String!
+    severity: AlertSeverity!
+    message: String!
+    details: String!
+}
+
+input PatchAlertInput {
+    id: ID!
+    alertName: String
+    severity: AlertSeverity
+    message: String
+    details: String
+}
+
+input CheckFilter {
+    checkId: ID
+    date: DateTime
+    url: String
+    titleSearch: String
+}
+
+input AlertFilter {
+    alertId: ID
+    dateOpen: DateTime
+    dateClose: DateTime
+    status: AlertStatus
+    severity: AlertSeverity
+    url: String
+}
+
+type Query {
+  alert(id: ID!): Alert
+
+  alerts(filter: AlertFilter, page: Int = 0, size: Int = 20): AlertConnection!
+
+  alertsByCheckId(checkId: ID!, page: Int = 0, size: Int = 20): AlertConnection!
+
+
+  check(id: ID!): Check
+
+  checks(filter: CheckFilter, page: Int = 0, size: Int = 20): CheckConnection!
+}
+
+type Mutation {
+  createAlert(checkId: ID!, input: CreateAlertInput!): Alert!
+  updateAlert(id: ID!, input: UpdateAlertInput!): Alert!
+  patchAlert(id: ID!, input: PatchAlertInput!): Alert!
+  acknowledgeAlert(id: ID!): Boolean!
+  resolveAlert(id: ID!): Boolean!
+  closeAlert(id: ID!): Boolean!
+  deleteAlert(id: ID!): Boolean!
+
+  createCheck(input: CreateCheckInput!): Check!
+  updateCheck(id: ID!, input: UpdateCheckInput!): Check!
+  patchCheck(id: ID!, input: PatchCheckInput!): Check!
+  runCheckNow(id: ID!): Check!
+  deleteCheck(id: ID!): Boolean!
+}
+
+# ПРИМЕРЫ ЗАПРОСОВ
+
+# 1. Получить один alert по id
+# query {
+#   alert(id: "1") {
+#     id
+#     status
+#     severity
+#     message
+#     details
+#     acknowledgedAt
+#     acknowledgedBy
+#     resolvedAt
+#   }
+# }
+
+# query {
+#   alerts(page: 0, size: 10) {
+#     totalElements
+#     pageInfo {
+#       page
+#       size
+#       totalPages
+#       last
+#     }
+#     items {
+#       id
+#       status
+#       severity
+#       message
+#       details
+#       createdAt
+#       updatedAt
+#       acknowledgedAt
+#       acknowledgedBy
+#       resolvedAt
+#     }
+#   }
+# }
+
+# query {
+#   alerts(
+#     filter: {
+#       url: "google.com"
+#     }
+#   ) {
+#     items {
+#       id
+#       message
+#     }
+#   }
+# }
+
+# query {
+#   alerts(
+#     filter: {
+#       dateOpen: "2026-04-01T00:00:00Z"
+#     }
+#   ) {
+#     items {
+#       id
+#       createdAt
+#       message
+#     }
+#   }
+# }
+
+# mutation {
+#   createAlert(
+#     checkId: "1"
+#     input: {
+#       alertName: "Database Failure"
+#       severity: CRITICAL
+#       message: "Database connection lost"
+#       details: "PostgreSQL timeout"
+#     }
+#   ) {
+#     id
+#     status
+#     severity
+#     message
+#   }
+# }
+
+# mutation {
+#   updateAlert(
+#     id: "1"
+#     input: {
+#       id: "1"
+#       alertName: "Updated Alert"
+#       severity: CRITICAL
+#       message: "Updated message"
+#       details: "Updated details"
+#     }
+#   ) {
+#     id
+#     severity
+#     message
+#     details
+#   }
+# }
+
+# mutation {
+#   patchAlert(
+#     id: "1"
+#     input: {
+#       id: "1"
+#       message: "Patched message only"
+#     }
+#   ) {
+#     id
+#     message
+#     details
+#   }
+# }
+
+# mutation {
+#   acknowledgeAlert(id: "1")
+# }
+
+# mutation {
+#   deleteAlert(id: "5")
+# }
+# query {
+#   alert(id: "5") {
+#     id
+#     message
+#   }
+# }
+
+# query {
+#   alerts(
+#     filter: {
+#       dateOpen: "2026-04-01T00:00:00Z"
+#       dateClose: "2026-04-30T23:59:59Z"
+#     }
+#     page: 0
+#     size: 20
+#   ) {
+#     totalElements
+#     items {
+#       id
+#       status
+#       severity
+#       message
+#     }
+#   }
+# }

@@ -1,6 +1,6 @@
 package edu.rutmiit.demo.uptimerobotapicontract.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
@@ -47,14 +47,16 @@ public class CheckResponse extends RepresentationModel<CheckResponse> {
     private final String expectedResponseContains;
 
     @Schema(description = "Время последнего изменения чека")
-    private final LocalDateTime createdAt;
+    private final OffsetDateTime createdAt;
 
     @Schema(description = "Время последнего изменения чека")
-    private final LocalDateTime updatedAt;
+    private final OffsetDateTime updatedAt;
 
-    @Schema(description = "Время ожидания ответа в секундах от ресурса в последний раз", example = "3")
+    @Schema(description = "Время ожидания ответа в секундах от ресурса в последний раз",
+            example = "3")
     private final Integer lastResponseTimeMs;
 
-    @Schema(description = "Сколько раз подряд чек завершился неудачей без единого успешного результата между ними", example = "5")
+    @Schema(description = "Сколько раз подряд чек завершился неудачей без единого успешного результата между ними",
+            example = "5")
     private final Integer consecutiveFailures;
 }

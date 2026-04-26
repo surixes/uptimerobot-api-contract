@@ -1,0 +1,12 @@
+package edu.rutmiit.demo.uptimerobotrest.graphql.types;
+
+public record CreateCheckInputGql(
+    String name,
+    String url,
+    String method,
+    Integer intervalSec,
+    Integer timeoutMs,
+    Boolean enabled,
+    Integer expectedStatusCode,
+    String expectedResponseContains
+) {}

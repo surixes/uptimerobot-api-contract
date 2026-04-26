@@ -1,6 +1,6 @@
 package edu.rutmiit.demo.uptimerobotapicontract.endpoints;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.EntityModel;
@@ -60,7 +60,7 @@ public interface CheckApi {
                                         required = false) Long checkId,
                         @Parameter(description = "Фильтр по дате создания чека") @RequestParam(
                                         required = false) @DateTimeFormat(
-                                                        iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date,
+                                                        iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime date,
                         @Parameter(description = "Фильтр чеков по url сервиса") @RequestParam(
                                         required = false) String url,
                         @Parameter(description = "Поиск чека по названию (substring, case-insensitive)",
@@ -95,10 +95,13 @@ public interface CheckApi {
                                         required = false) Long alerdId,
                         @Parameter(description = "Фильтр по дате создания алерта") @RequestParam(
                                         required = false) @DateTimeFormat(
-                                                        iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date,
-                        @Parameter(description = "Поиск алерта по названию (substring, case-insensitive)",
+                                                        iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime date,
+                        @Parameter(description = "Поиск алертов по названию чека (substring, case-insensitive)",
                                         example = "monitoring") @RequestParam(
-                                                        required = false) String titleSearch);
+                                                        required = false) String titleSearch,
+                        @Parameter(description = "Поиск алертов по урлу чека",
+                                        example = "https://google.com/health") @RequestParam(
+                                                        required = false) String url);
 
         @Operation(summary = "Создание чека",
                         security = @SecurityRequirement(

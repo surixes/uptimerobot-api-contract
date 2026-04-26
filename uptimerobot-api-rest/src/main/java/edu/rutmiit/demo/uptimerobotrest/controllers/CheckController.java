@@ -1,6 +1,6 @@
 package edu.rutmiit.demo.uptimerobotrest.controllers;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -28,10 +28,10 @@ public class CheckController implements CheckApi {
     private final PagedResourcesAssembler<CheckResponse> pagedCheckAssembler;
     private final PagedResourcesAssembler<AlertResponse> pagedAlertAssembler;
 
-    public CheckController(CheckService checkService, 
-            PagedResourcesAssembler<CheckResponse> pagedCheckAssembler, 
-            CheckModelAssembler checkModelAssembler, 
-            PagedResourcesAssembler<AlertResponse> pagedAlertAssembler, 
+    public CheckController(CheckService checkService,
+            PagedResourcesAssembler<CheckResponse> pagedCheckAssembler,
+            CheckModelAssembler checkModelAssembler,
+            PagedResourcesAssembler<AlertResponse> pagedAlertAssembler,
             AlertModelAssembler alertModelAssembler) {
         this.checkService = checkService;
         this.pagedCheckAssembler = pagedCheckAssembler;
@@ -39,28 +39,28 @@ public class CheckController implements CheckApi {
         this.pagedAlertAssembler = pagedAlertAssembler;
         this.alertModelAssembler = alertModelAssembler;
     }
-    
+
     @Override
-    public PagedModel<EntityModel<CheckResponse>> getAllChecks(int page, int size, Long checkId, LocalDateTime date, 
-            String url, String searchTitle) {
+    public PagedModel<EntityModel<CheckResponse>> getAllChecks(int page, int size, Long checkId,
+            OffsetDateTime date, String url, String searchTitle) {
         PagedResponse<CheckResponse> paged =
                 checkService.findAll(checkId, date, searchTitle, url, page, size);
         Page<CheckResponse> springPage = new PageImpl<>(paged.content(),
                 PageRequest.of(paged.pageNumber(), paged.pageSize()), paged.totalElements());
         return pagedCheckAssembler.toModel(springPage, checkModelAssembler);
     }
-    
+
     @Override
     public EntityModel<CheckResponse> getCheckById(Long id) {
         return checkModelAssembler.toModel(checkService.findById(id));
     }
 
     @Override
-    public PagedModel<EntityModel<AlertResponse>> getAlertsByCheckId(Long id, int page,
-            int size, Long alertId, LocalDateTime date, String titleSearch) {
+    public PagedModel<EntityModel<AlertResponse>> getAlertsByCheckId(Long id, int page, int size,
+            Long alertId, OffsetDateTime date, String titleSearch, String url) {
         checkService.findById(id);
         PagedResponse<AlertResponse> paged =
-                checkService.findByCheckId(id, page, size, alertId, date, titleSearch);
+                checkService.findByCheckId(id, page, size, alertId, date, titleSearch, url);
         Page<AlertResponse> springPage = new PageImpl<>(paged.content(),
                 PageRequest.of(paged.pageNumber(), paged.pageSize()), paged.totalElements());
 

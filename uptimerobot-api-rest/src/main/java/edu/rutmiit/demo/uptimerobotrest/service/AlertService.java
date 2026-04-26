@@ -2,7 +2,6 @@ package edu.rutmiit.demo.uptimerobotrest.service;
 
 import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertRequest;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertResponse;
-import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertSeverityEnum;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertStatusEnum;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.PagedResponse;
@@ -10,7 +9,7 @@ import edu.rutmiit.demo.uptimerobotapicontract.dto.PatchAlertRequest;
 import edu.rutmiit.demo.uptimerobotapicontract.exception.ResourceNotFoundException;
 import edu.rutmiit.demo.uptimerobotrest.storage.InMemoryStorage;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -26,16 +25,22 @@ public class AlertService {
                 this.checkService = checkService;
         }
 
-        public PagedResponse<AlertResponse> findAll(Long alertId, LocalDateTime dateOpen,
-                        LocalDateTime dateClose, AlertStatusEnum status, String url, int page,
+        public PagedResponse<AlertResponse> findAll(Long alertId, OffsetDateTime dateOpen,
+                        OffsetDateTime dateClose, AlertStatusEnum status, String url, int page,
                         int size) {
 
                 List<AlertResponse> all = storage.alerts.values().stream()
                                 .filter(a -> alertId == null || alertId.equals(a.getId()))
-                                .filter(a -> dateOpen == null || (a.getCreatedAt() != null && !a.getCreatedAt().isBefore(dateOpen)))
-                                .filter(a -> dateClose == null || (a.getResolvedAt() != null && !a.getResolvedAt().isAfter(dateClose)))
+                                .filter(a -> dateOpen == null || (a.getCreatedAt() != null
+                                                && !a.getCreatedAt().isBefore(dateOpen)))
+                                .filter(a -> dateClose == null || (a.getResolvedAt() != null
+                                                && !a.getResolvedAt().isAfter(dateClose)))
                                 .filter(a -> status == null || a.getStatus() == status)
-                                .filter(a -> url == null || url.isBlank() || (a.getCheck() != null && a.getCheck().getUrl() != null && a.getCheck().getUrl().contains(url)))
+                                .filter(a -> url == null || url.isBlank()
+                                                || (a.getCheck() != null
+                                                                && a.getCheck().getUrl() != null
+                                                                && a.getCheck().getUrl()
+                                                                                .contains(url)))
                                 .sorted(Comparator.comparingLong(AlertResponse::getId)).toList();
 
                 int totalElements = all.size();
@@ -59,7 +64,7 @@ public class AlertService {
                         throw new ResourceNotFoundException("Alert", id);
                 }
 
-                LocalDateTime now = LocalDateTime.now();
+                OffsetDateTime now = OffsetDateTime.now();
 
                 AlertResponse updated = AlertResponse.builder().id(existing.getId())
                                 .check(existing.getCheck()).status(status)
@@ -77,7 +82,7 @@ public class AlertService {
                                 .build();
                 storage.alerts.put(id, updated);
         }
-        
+
         public void delete(Long id) {
                 findById(id);
                 storage.alerts.remove(id);
@@ -85,27 +90,43 @@ public class AlertService {
 
         public AlertResponse create(AlertRequest request) {
                 long id = storage.alertSequence.incrementAndGet();
-                CheckResponse check = checkService.findByName(request.checkName());
-                LocalDateTime now = LocalDateTime.now();
+                CheckResponse check = checkService.findById(request.checkId());
+                OffsetDateTime now = OffsetDateTime.now();
 
                 AlertResponse alert = AlertResponse.builder().id(id).check(check)
-                                .status(AlertStatusEnum.CREATED)
-                                .severity(AlertSeverityEnum
-                                                .valueOf(request.severity().toUpperCase()))
+                                .status(AlertStatusEnum.CREATED).severity(request.severity())
                                 .details(request.details()).createdAt(now).build();
 
                 storage.alerts.put(id, alert);
                 return alert;
         }
-        
+
         public AlertResponse update(Long alertId, AlertRequest request) {
                 AlertResponse existing = findById(alertId);
-                LocalDateTime now = LocalDateTime.now();
+                OffsetDateTime now = OffsetDateTime.now();
                 AlertResponse alert = AlertResponse.builder().id(existing.getId())
                                 .check(existing.getCheck()).status(existing.getStatus())
-                                .severity(AlertSeverityEnum
-                                                .valueOf(request.severity().toUpperCase()))
-                                .message(request.message()).details(request.details())
+                                .severity(request.severity()).message(request.message())
+                                .details(request.details()).updatedAt(now)
+                                .createdAt(existing.getCreatedAt())
+                                .acknowledgedAt(existing.getAcknowledgedAt())
+                                .acknowledgedBy(existing.getAcknowledgedBy())
+                                .resolvedAt(existing.getResolvedAt()).build();
+                storage.alerts.put(alertId, alert);
+                return alert;
+        }
+
+        public AlertResponse patchAlert(Long alertId, PatchAlertRequest request) {
+                AlertResponse existing = findById(alertId);
+                OffsetDateTime now = OffsetDateTime.now();
+                AlertResponse alert = AlertResponse.builder().id(existing.getId())
+                                .check(existing.getCheck()).status(existing.getStatus())
+                                .severity(request.severity() != null ? request.severity()
+                                                : existing.getSeverity())
+                                .message(request.message() != null ? request.message()
+                                                : existing.getMessage())
+                                .details(request.details() != null ? request.details()
+                                                : existing.getDetails())
                                 .updatedAt(now).createdAt(existing.getCreatedAt())
                                 .acknowledgedAt(existing.getAcknowledgedAt())
                                 .acknowledgedBy(existing.getAcknowledgedBy())
@@ -113,21 +134,36 @@ public class AlertService {
                 storage.alerts.put(alertId, alert);
                 return alert;
         }
-        
-        public AlertResponse patchAlert(Long alertId, PatchAlertRequest request) {
-                AlertResponse existing = findById(alertId);
-                LocalDateTime now = LocalDateTime.now();
-                AlertResponse alert = AlertResponse.builder().id(existing.getId())
-                                .check(existing.getCheck()).status(existing.getStatus())
-                                .severity(request.severity() != null ? AlertSeverityEnum.valueOf(request.severity().toUpperCase()) : existing.getSeverity())
-                                .message(request.message() != null ? request.message()
-                                                : existing.getMessage())
-                                .details(request.details() != null ? request.details() : existing.getDetails())
-                                .updatedAt(now).createdAt(existing.getCreatedAt())
-                                .acknowledgedAt(existing.getAcknowledgedAt())
-                                .acknowledgedBy(existing.getAcknowledgedBy())
-                                .resolvedAt(existing.getResolvedAt()).build();
-                storage.alerts.put(alertId, alert);
-                return alert;   
+
+        public PagedResponse<AlertResponse> findByCheckId(Long checkId, int page, int size,
+                        Long alertId, OffsetDateTime date, String titleSearch) {
+
+                int effectivePage = Math.max(page, 0);
+                int effectiveSize = Math.max(size, 1);
+
+                List<AlertResponse> all = storage.alerts.values().stream()
+                                .filter(a -> a.getCheck() != null && a.getCheck().getId() != null
+                                                && checkId.equals(a.getCheck().getId()))
+                                .filter(a -> alertId == null || alertId.equals(a.getId()))
+                                .filter(a -> date == null || (a.getCreatedAt() != null
+                                                && !a.getCreatedAt().isBefore(date)))
+                                .filter(a -> titleSearch == null || titleSearch.isBlank() || (a
+                                                .getCheck() != null
+                                                && a.getCheck().getName() != null
+                                                && a.getCheck().getName().toLowerCase().contains(
+                                                                titleSearch.toLowerCase())))
+                                .sorted(Comparator.comparingLong(AlertResponse::getId)).toList();
+
+                int totalElements = all.size();
+                int totalPages = totalElements == 0 ? 0
+                                : (int) Math.ceil((double) totalElements / effectiveSize);
+
+                int from = effectivePage * effectiveSize;
+                int to = Math.min(from + effectiveSize, totalElements);
+                List<AlertResponse> content =
+                                from >= totalElements ? List.of() : all.subList(from, to);
+
+                return new PagedResponse<>(content, effectivePage, effectiveSize, totalElements,
+                                totalPages, effectivePage >= Math.max(totalPages - 1, 0));
         }
 }

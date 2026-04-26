@@ -33,7 +33,7 @@ public class AlertModelAssembler implements RepresentationModelAssembler<AlertRe
                     linkTo(methodOn(CheckController.class).getCheckById(alert.getCheck().getId()))
                             .withRel("check"),
                     linkTo(methodOn(CheckController.class)
-                            .getAlertsByCheckId(alert.getCheck().getId(), 0, 20, null, null, null))
+                            .getAlertsByCheckId(alert.getCheck().getId(), 0, 20, null, null, null, null))
                                     .withRel("check-alerts"));
         }
 

@@ -1,6 +1,6 @@
 package edu.rutmiit.demo.uptimerobotapicontract.endpoints;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.EntityModel;
@@ -47,10 +47,10 @@ public interface AlertApi {
                                         required = false) Long alertId,
                         @Parameter(description = "Фильтр по дате создания алетра") @RequestParam(
                                         required = false) @DateTimeFormat(
-                                                        iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateOpen,
+                                                        iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dateOpen,
                         @Parameter(description = "Фильтр по дате закрытия алетра") @RequestParam(
                                         required = false) @DateTimeFormat(
-                                                        iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateClose,
+                                                        iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dateClose,
                         @Parameter(description = "Фильтр по статусу алерта") @RequestParam(
                                         required = false) AlertStatusEnum status,
                         @Parameter(description = "Фильтр алертов по url сервиса") @RequestParam(
@@ -104,9 +104,10 @@ public interface AlertApi {
         void resolveAlert(@Parameter(description = "ID алерта", required = true,
                         example = "1") @PathVariable("id") Long id);
 
-        @Operation(summary = "Уведомить, что этот алерт закрыт", description = """
-                        Устанавливается статус 'closed' - означающий, что алерт решен и выполнены нужные действия
-                        """,
+        @Operation(summary = "Уведомить, что этот алерт закрыт",
+                        description = """
+                                        Устанавливается статус 'closed' - означающий, что алерт решен и выполнены нужные действия
+                                        """,
                         security = @SecurityRequirement(
                                         name = UptimeRobotApiContractConfig.SECURITY_SCHEME_BEARER))
         @ApiResponse(responseCode = "200", description = "Алерт закрыт")

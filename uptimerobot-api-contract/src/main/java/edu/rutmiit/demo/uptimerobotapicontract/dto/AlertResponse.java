@@ -1,6 +1,6 @@
 package edu.rutmiit.demo.uptimerobotapicontract.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import org.springframework.hateoas.server.core.Relation;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -37,17 +37,17 @@ public class AlertResponse {
     private final String details;
 
     @Schema(description = "Время последнего изменения чека")
-    private final LocalDateTime createdAt;
+    private final OffsetDateTime createdAt;
 
     @Schema(description = "Время последнего изменения чека")
-    private final LocalDateTime updatedAt;
+    private final OffsetDateTime updatedAt;
 
     @Schema(description = "Время реагирования на алерт")
-    private final LocalDateTime acknowledgedAt;
+    private final OffsetDateTime acknowledgedAt;
 
     @Schema(description = "Кто отреагировал на алерт")
     private final String acknowledgedBy;
 
     @Schema(description = "Время разрешения алерта")
-    private final LocalDateTime resolvedAt;
+    private final OffsetDateTime resolvedAt;
 }
