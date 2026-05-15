@@ -27,7 +27,6 @@ type Check {
     createdAt: DateTime!
     updatedAt: DateTime!
     lastResponseTimeMs: Int!
-    consecutiveFailures: Int!
     alerts(page: Int = 0, size: Int = 20): AlertConnection!
 }
 

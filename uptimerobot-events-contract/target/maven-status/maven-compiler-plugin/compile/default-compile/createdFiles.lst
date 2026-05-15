@@ -1,0 +1,11 @@
+edu/rutmiit/demo/events/AuthorEvent.class
+edu/rutmiit/demo/events/BookEvent$Enriched.class
+edu/rutmiit/demo/events/BookEvent$Updated.class
+edu/rutmiit/demo/events/BookEvent$Deleted.class
+edu/rutmiit/demo/events/BookEvent.class
+edu/rutmiit/demo/events/AuthorEvent$Deleted.class
+edu/rutmiit/demo/events/RoutingKeys.class
+edu/rutmiit/demo/events/BookEvent$Created.class
+edu/rutmiit/demo/events/EventEnvelope.class
+edu/rutmiit/demo/events/AuthorEvent$Created.class
+edu/rutmiit/demo/events/EventMetadata.class

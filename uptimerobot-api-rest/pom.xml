@@ -102,7 +102,13 @@
         <dependency>
             <groupId>com.netflix.graphql.dgs</groupId>
             <artifactId>graphql-dgs-extended-scalars</artifactId>
-        </dependency>     
+        </dependency>
+
+        <!-- Spring AMQP — интеграция с RabbitMQ для публикации доменных событий -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
 
     </dependencies>
     <build>

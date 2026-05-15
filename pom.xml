@@ -23,7 +23,10 @@
 
     <modules>
         <module>uptimerobot-api-contract</module>
+        <module>uptimerobot-events-contract</module>
+
         <module>uptimerobot-api-rest</module>
+        <!-- <module>incident-service</module> -->
     </modules>
 
 </project>

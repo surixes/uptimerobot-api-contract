@@ -1,0 +1,5 @@
+/home/zimonin/work/uptimerobot-api-contract/uptimerobot-events-contract/src/main/java/edu/rutmiit/demo/events/AuthorEvent.java
+/home/zimonin/work/uptimerobot-api-contract/uptimerobot-events-contract/src/main/java/edu/rutmiit/demo/events/BookEvent.java
+/home/zimonin/work/uptimerobot-api-contract/uptimerobot-events-contract/src/main/java/edu/rutmiit/demo/events/EventEnvelope.java
+/home/zimonin/work/uptimerobot-api-contract/uptimerobot-events-contract/src/main/java/edu/rutmiit/demo/events/EventMetadata.java
+/home/zimonin/work/uptimerobot-api-contract/uptimerobot-events-contract/src/main/java/edu/rutmiit/demo/events/RoutingKeys.java

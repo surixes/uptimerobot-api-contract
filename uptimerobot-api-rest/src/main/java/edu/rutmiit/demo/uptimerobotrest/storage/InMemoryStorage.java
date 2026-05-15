@@ -30,70 +30,70 @@ public class InMemoryStorage {
                                 .method("GET").intervalSec(30).timeoutMs(5000).enabled(true)
                                 .expectedStatusCode(200).expectedResponseContains("OK")
                                 .createdAt(now.minusDays(5)).updatedAt(now.minusHours(2))
-                                .lastResponseTimeMs(120).consecutiveFailures(0).build();
+                                .lastResponseTimeMs(120).build();
 
                 CheckResponse check2 = CheckResponse.builder().id(checkSequence.incrementAndGet())
                                 .name("auth-check").url("https://api.example.com/auth/health")
                                 .method("POST").intervalSec(60).timeoutMs(3000).enabled(true)
                                 .expectedStatusCode(204).expectedResponseContains(null)
                                 .createdAt(now.minusDays(4)).updatedAt(now.minusHours(1))
-                                .lastResponseTimeMs(240).consecutiveFailures(1).build();
+                                .lastResponseTimeMs(240).build();
 
                 CheckResponse check3 = CheckResponse.builder().id(checkSequence.incrementAndGet())
                                 .name("billing-check").url("https://billing.example.com/health")
                                 .method("GET").intervalSec(15).timeoutMs(1000).enabled(false)
                                 .expectedStatusCode(200).expectedResponseContains("healthy")
                                 .createdAt(now.minusDays(3)).updatedAt(now.minusHours(6))
-                                .lastResponseTimeMs(980).consecutiveFailures(5).build();
+                                .lastResponseTimeMs(980).build();
 
                 CheckResponse check4 = CheckResponse.builder().id(checkSequence.incrementAndGet())
                                 .name("payments-check").url("https://payments.example.com/health")
                                 .method("GET").intervalSec(20).timeoutMs(2000).enabled(true)
                                 .expectedStatusCode(200).expectedResponseContains("OK")
                                 .createdAt(now.minusDays(2)).updatedAt(now.minusHours(3))
-                                .lastResponseTimeMs(310).consecutiveFailures(0).build();
+                                .lastResponseTimeMs(310).build();
 
                 CheckResponse check5 = CheckResponse.builder().id(checkSequence.incrementAndGet())
                                 .name("search-check").url("https://search.example.com/health")
                                 .method("GET").intervalSec(10).timeoutMs(1500).enabled(true)
                                 .expectedStatusCode(200).expectedResponseContains("alive")
                                 .createdAt(now.minusDays(1)).updatedAt(now.minusMinutes(30))
-                                .lastResponseTimeMs(95).consecutiveFailures(0).build();
+                                .lastResponseTimeMs(95).build();
 
                 CheckResponse check6 = CheckResponse.builder().id(checkSequence.incrementAndGet())
                                 .name("cdn-check").url("https://cdn.example.com/ping").method("GET")
                                 .intervalSec(25).timeoutMs(1200).enabled(true)
                                 .expectedStatusCode(200).expectedResponseContains(null)
                                 .createdAt(now.minusDays(6)).updatedAt(now.minusHours(4))
-                                .lastResponseTimeMs(180).consecutiveFailures(2).build();
+                                .lastResponseTimeMs(180).build();
 
                 CheckResponse check7 = CheckResponse.builder().id(checkSequence.incrementAndGet())
                                 .name("email-check").url("https://mail.example.com/health")
                                 .method("GET").intervalSec(45).timeoutMs(4000).enabled(true)
                                 .expectedStatusCode(200).expectedResponseContains("OK")
                                 .createdAt(now.minusDays(10)).updatedAt(now.minusHours(10))
-                                .lastResponseTimeMs(600).consecutiveFailures(3).build();
+                                .lastResponseTimeMs(600).build();
 
                 CheckResponse check8 = CheckResponse.builder().id(checkSequence.incrementAndGet())
                                 .name("notification-check").url("https://notify.example.com/health")
                                 .method("POST").intervalSec(30).timeoutMs(2500).enabled(true)
                                 .expectedStatusCode(200).expectedResponseContains("OK")
                                 .createdAt(now.minusDays(7)).updatedAt(now.minusHours(5))
-                                .lastResponseTimeMs(210).consecutiveFailures(0).build();
+                                .lastResponseTimeMs(210).build();
 
                 CheckResponse check9 = CheckResponse.builder().id(checkSequence.incrementAndGet())
                                 .name("analytics-check").url("https://analytics.example.com/health")
                                 .method("GET").intervalSec(60).timeoutMs(5000).enabled(false)
                                 .expectedStatusCode(200).expectedResponseContains("OK")
                                 .createdAt(now.minusDays(20)).updatedAt(now.minusDays(1))
-                                .lastResponseTimeMs(1500).consecutiveFailures(7).build();
+                                .lastResponseTimeMs(1500).build();
 
                 CheckResponse check10 = CheckResponse.builder().id(checkSequence.incrementAndGet())
                                 .name("gateway-check").url("https://gateway.example.com/health")
                                 .method("GET").intervalSec(5).timeoutMs(1000).enabled(true)
                                 .expectedStatusCode(200).expectedResponseContains("UP")
                                 .createdAt(now.minusHours(12)).updatedAt(now.minusMinutes(10))
-                                .lastResponseTimeMs(80).consecutiveFailures(0).build();
+                                .lastResponseTimeMs(80).build();
 
                 checks.put(check1.getId(), check1);
                 checks.put(check2.getId(), check2);

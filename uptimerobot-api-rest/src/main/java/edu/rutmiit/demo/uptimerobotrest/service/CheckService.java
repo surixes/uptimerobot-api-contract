@@ -91,8 +91,7 @@ public class CheckService {
                                 .timeoutMs(request.timeoutMs()).enabled(request.enabled())
                                 .expectedStatusCode(request.expectedStatusCode())
                                 .expectedResponseContains(request.expectedResponseContains())
-                                .createdAt(now).updatedAt(now).lastResponseTimeMs(0)
-                                .consecutiveFailures(0).build();
+                                .createdAt(now).updatedAt(now).lastResponseTimeMs(0).build();
 
                 storage.checks.put(id, check);
                 return check;
@@ -109,8 +108,7 @@ public class CheckService {
                                 .expectedStatusCode(request.expectedStatusCode())
                                 .expectedResponseContains(request.expectedResponseContains())
                                 .createdAt(existing.getCreatedAt()).updatedAt(now)
-                                .lastResponseTimeMs(existing.getLastResponseTimeMs())
-                                .consecutiveFailures(existing.getConsecutiveFailures()).build();
+                                .lastResponseTimeMs(existing.getLastResponseTimeMs()).build();
 
                 storage.checks.put(id, updated);
                 return updated;
@@ -137,8 +135,7 @@ public class CheckService {
                                                 ? request.expectedResponseContains()
                                                 : existing.getExpectedResponseContains())
                                 .createdAt(existing.getCreatedAt()).updatedAt(now)
-                                .lastResponseTimeMs(existing.getLastResponseTimeMs())
-                                .consecutiveFailures(existing.getConsecutiveFailures()).build();
+                                .lastResponseTimeMs(existing.getLastResponseTimeMs()).build();
 
                 storage.checks.put(id, updated);
                 return updated;
@@ -162,8 +159,7 @@ public class CheckService {
                                 .expectedStatusCode(existing.getExpectedStatusCode())
                                 .expectedResponseContains(existing.getExpectedResponseContains())
                                 .createdAt(existing.getCreatedAt()).updatedAt(now)
-                                .lastResponseTimeMs(existing.getLastResponseTimeMs())
-                                .consecutiveFailures(existing.getConsecutiveFailures()).build();
+                                .lastResponseTimeMs(existing.getLastResponseTimeMs()).build();
 
                 storage.checks.put(id, updated);
                 return updated;
