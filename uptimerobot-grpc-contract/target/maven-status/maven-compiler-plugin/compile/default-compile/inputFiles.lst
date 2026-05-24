@@ -1,8 +1,0 @@
-/home/zimonin/work/uptimerobot-api-contract/uptimerobot-grpc-contract/target/generated-sources/protobuf/grpc-java/edu/rutmiit/demo/grpc/sla/SlaCalculatorGrpc.java
-/home/zimonin/work/uptimerobot-api-contract/uptimerobot-grpc-contract/target/generated-sources/protobuf/java/edu/rutmiit/demo/grpc/sla/CalculateSlaRequest.java
-/home/zimonin/work/uptimerobot-api-contract/uptimerobot-grpc-contract/target/generated-sources/protobuf/java/edu/rutmiit/demo/grpc/sla/CalculateSlaRequestOrBuilder.java
-/home/zimonin/work/uptimerobot-api-contract/uptimerobot-grpc-contract/target/generated-sources/protobuf/java/edu/rutmiit/demo/grpc/sla/CalculateSlaResponse.java
-/home/zimonin/work/uptimerobot-api-contract/uptimerobot-grpc-contract/target/generated-sources/protobuf/java/edu/rutmiit/demo/grpc/sla/CalculateSlaResponseOrBuilder.java
-/home/zimonin/work/uptimerobot-api-contract/uptimerobot-grpc-contract/target/generated-sources/protobuf/java/edu/rutmiit/demo/grpc/sla/CheckExecution.java
-/home/zimonin/work/uptimerobot-api-contract/uptimerobot-grpc-contract/target/generated-sources/protobuf/java/edu/rutmiit/demo/grpc/sla/CheckExecutionOrBuilder.java
-/home/zimonin/work/uptimerobot-api-contract/uptimerobot-grpc-contract/target/generated-sources/protobuf/java/edu/rutmiit/demo/grpc/sla/SlaCalculatorOuterClass.java
