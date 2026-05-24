@@ -36,9 +36,14 @@ public final class RoutingKeys {
     public static final String CHECK_DELETED = "check.deleted";
     public static final String CHECK_EXECUTED = "check.executed";
 
+    public static final String SLA_CALCULATED = "sla.calculated";
+
     // Паттерны для подписки (wildcard)
     public static final String ALL_ALERT_RULE_EVENTS = "alertrule.*";
     public static final String ALL_INCIDENT_EVENTS = "incident.*";
     public static final String ALL_CHECK_EVENTS = "check.*";
+
+    public static final String ALL_SLA_EVENTS = "sla.*";
+
     public static final String ALL_EVENTS = "#";
 }

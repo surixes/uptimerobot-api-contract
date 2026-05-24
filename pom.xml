@@ -14,6 +14,9 @@
         # Собрать только контракт (если менял только его)
         .\mvnw install -pl books-api-contract
 
+        mvn -f uptimerobot-incident-service/pom.xml spring-boot:run
+        mvn -f grpc-sla-calculator-server/pom.xml spring-boot:run
+        mvn -f grpc-sla-enrichment-client/pom.xml spring-boot:run
         mvn -f uptimerobot-api-rest/pom.xml spring-boot:run
     -->
 
@@ -26,9 +29,12 @@
     <modules>
         <module>uptimerobot-api-contract</module>
         <module>uptimerobot-events-contract</module>
+        <module>uptimerobot-grpc-contract</module>
 
         <module>uptimerobot-api-rest</module>
         <module>uptimerobot-incident-service</module>
+        <module>grpc-sla-calculator-server</module>
+        <module>grpc-sla-enrichment-client</module>
     </modules>
 
 </project>
