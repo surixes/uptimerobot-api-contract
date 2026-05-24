@@ -21,10 +21,14 @@ public final class RoutingKeys {
     public static final String EXCHANGE = "uptimerobot.events";
 
     // Routing keys для событий алертов
-    public static final String ALERT_OPENED = "alert.opened";
-    public static final String ALERT_RESOLVED = "alert.resolved";
-    public static final String ALERT_ACKNOWLEDGED = "alert.acknowledged";
-    public static final String ALERT_CLOSED = "alert.closed";
+    public static final String ALERT_RULE_CREATED = "alertrule.created";
+    public static final String ALERT_RULE_UPDATED = "alertrule.updated";
+    public static final String ALERT_RULE_DELETED = "alertrule.deleted";
+
+    public static final String INCIDENT_OPENED = "incident.opened";
+    public static final String INCIDENT_RESOLVED = "incident.resolved";
+    public static final String INCIDENT_ACKNOWLEDGED = "incident.acknowledged";
+    public static final String INCIDENT_CLOSED = "incident.closed";
 
     // Routing keys для событий чеков
     public static final String CHECK_CREATED = "check.created";
@@ -33,7 +37,8 @@ public final class RoutingKeys {
     public static final String CHECK_EXECUTED = "check.executed";
 
     // Паттерны для подписки (wildcard)
-    public static final String ALL_ALERTS_EVENTS = "alert.*";
+    public static final String ALL_ALERT_RULE_EVENTS = "alertrule.*";
+    public static final String ALL_INCIDENT_EVENTS = "incident.*";
     public static final String ALL_CHECK_EVENTS = "check.*";
     public static final String ALL_EVENTS = "#";
 }

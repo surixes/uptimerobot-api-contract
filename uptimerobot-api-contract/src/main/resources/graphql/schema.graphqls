@@ -1,46 +1,33 @@
 scalar DateTime
 
-enum AlertStatus {
-  CREATED
-  NEW
-  ACKNOWLEDGED
-  RESOLVED
-  CLOSED
+enum CheckMethod {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+  HEAD
+  OPTIONS
 }
 
-enum AlertSeverity {
+enum IncidentSeverity {
   INFO
   WARNING
   CRITICAL
 }
 
-type Check {
-    id: ID!
-    name: String!
-    url: String!
-    method: String!
-    intervalSec: Int!
-    timeoutMs: Int!
-    enabled: Boolean!
-    expectedStatusCode: Int!
-    expectedResponseContains: String!
-    createdAt: DateTime!
-    updatedAt: DateTime!
-    lastResponseTimeMs: Int!
-    alerts(page: Int = 0, size: Int = 20): AlertConnection!
+enum AlertRuleType {
+  RESPONSE_TIME_GT
+  RESPONSE_BODY_CONTAINS
+  STATUS_CODE_NEQ
+  FAILURE_STREAK_GTE
 }
 
-type Alert {
-    id: ID!
-    status: AlertStatus!
-    severity: AlertSeverity!
-    message: String
-    details: String
-    createdAt: DateTime!
-    updatedAt: DateTime
-    acknowledgedAt: DateTime
-    acknowledgedBy: String
-    resolvedAt: DateTime
+enum IncidentStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+  CLOSED
 }
 
 type PageInfo {
@@ -50,139 +37,291 @@ type PageInfo {
   last: Boolean!
 }
 
+type Check {
+  id: ID!
+  name: String!
+  url: String!
+  method: CheckMethod!
+  intervalSec: Int!
+  timeoutMs: Int!
+  enabled: Boolean!
+  expectedStatusCode: Int
+  expectedResponseContains: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastResponseTimeMs: Int
+  alertRules(page: Int = 0, size: Int = 20): AlertRuleConnection!
+  incidents(page: Int = 0, size: Int = 20): IncidentConnection!
+}
+
+type AlertRule {
+  id: ID!
+  check: Check!
+  alertName: String!
+  ruleType: AlertRuleType!
+  enabled: Boolean!
+  severity: IncidentSeverity!
+  thresholdMs: Int
+  expectedStatusCode: Int
+  expectedResponseContains: String
+  failureCount: Int
+  message: String
+  details: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+  incidents(page: Int = 0, size: Int = 20): IncidentConnection!
+}
+
+type Incident {
+  id: ID!
+  check: Check!
+  alertRule: AlertRule!
+  status: IncidentStatus!
+  severity: IncidentSeverity!
+  message: String
+  details: String
+  openedAt: DateTime!
+  updatedAt: DateTime
+  acknowledgedAt: DateTime
+  acknowledgedBy: String
+  resolvedAt: DateTime
+  closedAt: DateTime
+}
+
 type CheckConnection {
   items: [Check!]!
   pageInfo: PageInfo!
   totalElements: Int!
 }
 
-type AlertConnection {
-  items: [Alert!]!
+type AlertRuleConnection {
+  items: [AlertRule!]!
+  pageInfo: PageInfo!
+  totalElements: Int!
+}
+
+type IncidentConnection {
+  items: [Incident!]!
   pageInfo: PageInfo!
   totalElements: Int!
 }
 
 input CreateCheckInput {
-    name: String!
-    url: String!
-    method: String!
-    intervalSec: Int!
-    timeoutMs: Int!
-    enabled: Boolean!
-    expectedStatusCode: Int
-    expectedResponseContains: String
+  name: String!
+  url: String!
+  method: CheckMethod!
+  intervalSec: Int!
+  timeoutMs: Int!
+  enabled: Boolean!
+  expectedStatusCode: Int
+  expectedResponseContains: String
 }
 
 input UpdateCheckInput {
-    id: ID!
-    name: String!
-    url: String!
-    method: String!
-    intervalSec: Int!
-    timeoutMs: Int!
-    enabled: Boolean!
-    expectedStatusCode: Int!
-    expectedResponseContains: String!
+  name: String!
+  url: String!
+  method: CheckMethod!
+  intervalSec: Int!
+  timeoutMs: Int!
+  enabled: Boolean!
+  expectedStatusCode: Int
+  expectedResponseContains: String
 }
 
 input PatchCheckInput {
-    id: ID!
-    name: String
-    url: String
-    method: String
-    intervalSec: Int
-    timeoutMs: Int
-    enabled: Boolean
-    expectedStatusCode: Int
-    expectedResponseContains: String
+  name: String
+  url: String
+  method: CheckMethod
+  intervalSec: Int
+  timeoutMs: Int
+  enabled: Boolean
+  expectedStatusCode: Int
+  expectedResponseContains: String
 }
 
-input CreateAlertInput {
-    alertName: String!
-    severity: AlertSeverity!
-    message: String
-    details: String
+input CreateAlertRuleInput {
+  checkId: ID!
+  alertName: String!
+  ruleType: AlertRuleType!
+  severity: IncidentSeverity!
+  enabled: Boolean!
+  thresholdMs: Int
+  expectedStatusCode: Int
+  expectedResponseContains: String
+  failureCount: Int
+  message: String
+  details: String
 }
 
-input UpdateAlertInput {
-    id: ID!
-    alertName: String!
-    severity: AlertSeverity!
-    message: String!
-    details: String!
+input UpdateAlertRuleInput {
+  checkId: ID!
+  alertName: String!
+  ruleType: AlertRuleType!
+  severity: IncidentSeverity!
+  enabled: Boolean!
+  thresholdMs: Int
+  expectedStatusCode: Int
+  expectedResponseContains: String
+  failureCount: Int
+  message: String
+  details: String
 }
 
-input PatchAlertInput {
-    id: ID!
-    alertName: String
-    severity: AlertSeverity
-    message: String
-    details: String
+input PatchAlertRuleInput {
+  checkId: ID
+  alertName: String
+  severity: IncidentSeverity
+  message: String
+  details: String
+}
+
+input CreateIncidentInput {
+  checkId: ID!
+  alertRuleId: ID!
+  status: IncidentStatus!
+  severity: IncidentSeverity!
+  message: String
+  details: String
+  openedAt: DateTime!
+}
+
+input UpdateIncidentInput {
+  checkId: ID!
+  alertRuleId: ID!
+  status: IncidentStatus!
+  severity: IncidentSeverity!
+  message: String
+  details: String
+  openedAt: DateTime!
+}
+
+input PatchIncidentInput {
+  status: IncidentStatus
+  severity: IncidentSeverity
+  message: String
+  details: String
+  acknowledgedAt: DateTime
+  acknowledgedBy: String
+  resolvedAt: DateTime
+  closedAt: DateTime
 }
 
 input CheckFilter {
-    checkId: ID
-    date: DateTime
-    url: String
-    titleSearch: String
+  checkId: ID
+  name: String
+  url: String
+  method: CheckMethod
+  enabled: Boolean
 }
 
-input AlertFilter {
-    alertId: ID
-    dateOpen: DateTime
-    dateClose: DateTime
-    status: AlertStatus
-    severity: AlertSeverity
-    url: String
+input AlertRuleFilter {
+  alertRuleId: ID
+  checkId: ID
+  ruleType: AlertRuleType
+  severity: IncidentSeverity
+  enabled: Boolean
+  url: String
+  createdAtFrom: DateTime
+  createdAtTo: DateTime
+}
+
+input IncidentFilter {
+  incidentId: ID
+  checkId: ID
+  alertRuleId: ID
+  status: IncidentStatus
+  severity: IncidentSeverity
+  url: String
+  openedAtFrom: DateTime
+  openedAtTo: DateTime
+  closedAtFrom: DateTime
+  closedAtTo: DateTime
 }
 
 type Query {
-  alert(id: ID!): Alert
-
-  alerts(filter: AlertFilter, page: Int = 0, size: Int = 20): AlertConnection!
-
-  alertsByCheckId(checkId: ID!, page: Int = 0, size: Int = 20): AlertConnection!
-
-
   check(id: ID!): Check
-
   checks(filter: CheckFilter, page: Int = 0, size: Int = 20): CheckConnection!
+
+  alertRule(id: ID!): AlertRule
+  alertRules(
+    filter: AlertRuleFilter
+    page: Int = 0
+    size: Int = 20
+  ): AlertRuleConnection!
+  alertRulesByCheckId(
+    checkId: ID!
+    page: Int = 0
+    size: Int = 20
+  ): AlertRuleConnection!
+
+  incident(id: ID!): Incident
+  incidents(
+    filter: IncidentFilter
+    page: Int = 0
+    size: Int = 20
+  ): IncidentConnection!
 }
 
 type Mutation {
-  createAlert(checkId: ID!, input: CreateAlertInput!): Alert!
-  updateAlert(id: ID!, input: UpdateAlertInput!): Alert!
-  patchAlert(id: ID!, input: PatchAlertInput!): Alert!
-  acknowledgeAlert(id: ID!): Boolean!
-  resolveAlert(id: ID!): Boolean!
-  closeAlert(id: ID!): Boolean!
-  deleteAlert(id: ID!): Boolean!
-
   createCheck(input: CreateCheckInput!): Check!
   updateCheck(id: ID!, input: UpdateCheckInput!): Check!
   patchCheck(id: ID!, input: PatchCheckInput!): Check!
-  runCheckNow(id: ID!): Check!
   deleteCheck(id: ID!): Boolean!
+  runCheckNow(id: ID!): Check!
+
+  createAlertRule(input: CreateAlertRuleInput!): AlertRule!
+  updateAlertRule(id: ID!, input: UpdateAlertRuleInput!): AlertRule!
+  patchAlertRule(id: ID!, input: PatchAlertRuleInput!): AlertRule!
+  deleteAlertRule(id: ID!): Boolean!
+
+  createIncident(input: CreateIncidentInput!): Incident!
+  updateIncident(id: ID!, input: UpdateIncidentInput!): Incident!
+  patchIncident(id: ID!, input: PatchIncidentInput!): Incident!
+  deleteIncident(id: ID!): Boolean!
 }
 
-# ПРИМЕРЫ ЗАПРОСОВ
-
-# 1. Получить один alert по id
-# query {
-#   alert(id: "1") {
+# Примеры запросов
+# 
+# mutation {
+#   createCheck(
+#     input: {
+#       name: "Google Health"
+#       url: "https://google.com"
+#       method: GET
+#       intervalSec: 60
+#       timeoutMs: 5000
+#       enabled: true
+#       expectedStatusCode: 200
+#       expectedResponseContains: "Google"
+#     }
+#   ) {
 #     id
-#     status
-#     severity
-#     message
-#     details
-#     acknowledgedAt
-#     acknowledgedBy
-#     resolvedAt
+#     name
+#     method
+#     enabled
+#     createdAt
+#   }
+# }
+
+# mutation {
+#   createCheck(
+#     input: {
+#       name: "GitHub API"
+#       url: "https://api.github.com"
+#       method: GET
+#       intervalSec: 30
+#       timeoutMs: 3000
+#       enabled: true
+#     }
+#   ) {
+#     id
+#     name
+#     url
 #   }
 # }
 
 # query {
-#   alerts(page: 0, size: 10) {
+#   checks(page: 0, size: 10) {
 #     totalElements
 #     pageInfo {
 #       page
@@ -192,124 +331,168 @@ type Mutation {
 #     }
 #     items {
 #       id
-#       status
+#       name
+#       url
+#       method
+#       enabled
+#     }
+#   }
+# }
+
+# query {
+#   checks(filter: { method: GET, enabled: true }) {
+#     items {
+#       id
+#       name
+#       method
+#     }
+#   }
+# }
+
+# query {
+#   check(id: 1) {
+#     id
+#     name
+#     url
+#     intervalSec
+#     timeoutMs
+#     createdAt
+#   }
+# }
+
+# mutation {
+#   patchCheck(id: 1, input: { enabled: false, timeoutMs: 10000 }) {
+#     id
+#     enabled
+#     timeoutMs
+#     updatedAt
+#   }
+# }
+
+# mutation {
+#   updateCheck(
+#     id: 1
+#     input: {
+#       name: "Google Updated"
+#       url: "https://google.com"
+#       method: GET
+#       intervalSec: 120
+#       timeoutMs: 4000
+#       enabled: true
+#       expectedStatusCode: 200
+#       expectedResponseContains: "Search"
+#     }
+#   ) {
+#     id
+#     name
+#     intervalSec
+#   }
+# }
+
+# mutation {
+#   createAlertRule(
+#     input: {
+#       checkId: 1
+#       alertName: "Slow response"
+#       ruleType: RESPONSE_TIME_GT
+#       severity: WARNING
+#       enabled: true
+#       thresholdMs: 2000
+#       message: "Response too slow"
+#       details: "Latency exceeded threshold"
+#     }
+#   ) {
+#     id
+#     alertName
+#     ruleType
+#     severity
+#   }
+# }
+
+# mutation {
+#   createAlertRule(
+#     input: {
+#       checkId: 1
+#       alertName: "Bad status"
+#       ruleType: STATUS_CODE_NEQ
+#       severity: CRITICAL
+#       enabled: true
+#       expectedStatusCode: 200
+#       message: "Unexpected status code"
+#     }
+#   ) {
+#     id
+#     ruleType
+#     expectedStatusCode
+#   }
+# }
+
+# query {
+#   alertRules(filter: { severity: CRITICAL, enabled: true }) {
+#     items {
+#       id
+#       alertName
 #       severity
-#       message
-#       details
-#       createdAt
-#       updatedAt
-#       acknowledgedAt
-#       acknowledgedBy
-#       resolvedAt
-#     }
-#   }
-# }
-
-# query {
-#   alerts(
-#     filter: {
-#       url: "google.com"
-#     }
-#   ) {
-#     items {
-#       id
-#       message
-#     }
-#   }
-# }
-
-# query {
-#   alerts(
-#     filter: {
-#       dateOpen: "2026-04-01T00:00:00Z"
-#     }
-#   ) {
-#     items {
-#       id
-#       createdAt
-#       message
 #     }
 #   }
 # }
 
 # mutation {
-#   createAlert(
-#     checkId: "1"
+#   patchIncident(
+#     id: 1
 #     input: {
-#       alertName: "Database Failure"
-#       severity: CRITICAL
-#       message: "Database connection lost"
-#       details: "PostgreSQL timeout"
+#       status: ACKNOWLEDGED
+#       acknowledgedAt: "2026-05-23T20:00:00Z"
+#       acknowledgedBy: "admin"
 #     }
 #   ) {
 #     id
 #     status
-#     severity
-#     message
-#   }
-# }
-
-# mutation {
-#   updateAlert(
-#     id: "1"
-#     input: {
-#       id: "1"
-#       alertName: "Updated Alert"
-#       severity: CRITICAL
-#       message: "Updated message"
-#       details: "Updated details"
-#     }
-#   ) {
-#     id
-#     severity
-#     message
-#     details
-#   }
-# }
-
-# mutation {
-#   patchAlert(
-#     id: "1"
-#     input: {
-#       id: "1"
-#       message: "Patched message only"
-#     }
-#   ) {
-#     id
-#     message
-#     details
-#   }
-# }
-
-# mutation {
-#   acknowledgeAlert(id: "1")
-# }
-
-# mutation {
-#   deleteAlert(id: "5")
-# }
-# query {
-#   alert(id: "5") {
-#     id
-#     message
+#     acknowledgedAt
+#     acknowledgedBy
 #   }
 # }
 
 # query {
-#   alerts(
-#     filter: {
-#       dateOpen: "2026-04-01T00:00:00Z"
-#       dateClose: "2026-04-30T23:59:59Z"
+#   check(id: 1) {
+#     id
+#     name
+
+#     alertRules(page: 0, size: 10) {
+#       items {
+#         id
+#         alertName
+#         severity
+
+#         incidents(page: 0, size: 10) {
+#           items {
+#             id
+#             status
+#             message
+#           }
+#         }
+#       }
 #     }
-#     page: 0
-#     size: 20
-#   ) {
-#     totalElements
-#     items {
-#       id
-#       status
-#       severity
-#       message
+
+#     incidents(page: 0, size: 10) {
+#       items {
+#         id
+#         status
+#         severity
+#         alertRule {
+#           id
+#           alertName
+#         }
+#       }
 #     }
+#   }
+# }
+
+# mutation {
+#   runCheckNow(id: 1) {
+#     id
+#     name
+#     lastResponseTimeMs
+#     updatedAt
 #   }
 # }

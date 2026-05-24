@@ -1,9 +1,11 @@
 package edu.rutmiit.demo.uptimerobotrest.storage;
 
-import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertResponse;
-import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertSeverityEnum;
-import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertStatusEnum;
+import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertRuleResponse;
+import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertRuleTypeEnum;
+import edu.rutmiit.demo.uptimerobotapicontract.dto.IncidentSeverityEnum;
+import edu.rutmiit.demo.uptimerobotapicontract.dto.IncidentStatusEnum;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckResponse;
+import edu.rutmiit.demo.uptimerobotapicontract.dto.IncidentResponse;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
@@ -15,176 +17,316 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class InMemoryStorage {
 
-        public final Map<Long, CheckResponse> checks = new ConcurrentHashMap<>();
-        public final Map<Long, AlertResponse> alerts = new ConcurrentHashMap<>();
+    public final Map<Long, CheckResponse> checks = new ConcurrentHashMap<>();
+    public final Map<Long, AlertRuleResponse> alertRules = new ConcurrentHashMap<>();
+    public final Map<Long, IncidentResponse> incidents = new ConcurrentHashMap<>();
 
-        public final AtomicLong checkSequence = new AtomicLong(0);
-        public final AtomicLong alertSequence = new AtomicLong(0);
+    public final AtomicLong checkSequence = new AtomicLong(0);
+    public final AtomicLong alertRuleSequence = new AtomicLong(0);
+    public final AtomicLong incidentSequence = new AtomicLong(0);
 
-        @PostConstruct
-        public void init() {
-                OffsetDateTime now = OffsetDateTime.now();
+    @PostConstruct
+    public void init() {
 
-                CheckResponse check1 = CheckResponse.builder().id(checkSequence.incrementAndGet())
-                                .name("service-check").url("https://google.com/health")
-                                .method("GET").intervalSec(30).timeoutMs(5000).enabled(true)
-                                .expectedStatusCode(200).expectedResponseContains("OK")
-                                .createdAt(now.minusDays(5)).updatedAt(now.minusHours(2))
-                                .lastResponseTimeMs(120).build();
+        OffsetDateTime now = OffsetDateTime.now();
 
-                CheckResponse check2 = CheckResponse.builder().id(checkSequence.incrementAndGet())
-                                .name("auth-check").url("https://api.example.com/auth/health")
-                                .method("POST").intervalSec(60).timeoutMs(3000).enabled(true)
-                                .expectedStatusCode(204).expectedResponseContains(null)
-                                .createdAt(now.minusDays(4)).updatedAt(now.minusHours(1))
-                                .lastResponseTimeMs(240).build();
+        CheckResponse check1 = CheckResponse.builder()
+                .id(checkSequence.incrementAndGet())
+                .name("gateway-check")
+                .url("https://catfact.ninja.popa")
+                .method("GET")
+                .intervalSec(10)
+                .timeoutMs(5000)
+                .enabled(true)
+                .expectedStatusCode(200)
+                .expectedResponseContains(null)
+                .createdAt(now.minusDays(5))
+                .updatedAt(now.minusHours(2))
+                .lastResponseTimeMs(80)
+                .build();
 
-                CheckResponse check3 = CheckResponse.builder().id(checkSequence.incrementAndGet())
-                                .name("billing-check").url("https://billing.example.com/health")
-                                .method("GET").intervalSec(15).timeoutMs(1000).enabled(false)
-                                .expectedStatusCode(200).expectedResponseContains("healthy")
-                                .createdAt(now.minusDays(3)).updatedAt(now.minusHours(6))
-                                .lastResponseTimeMs(980).build();
+        CheckResponse check2 = CheckResponse.builder()
+                .id(checkSequence.incrementAndGet())
+                .name("catfact-api-check")
+                .url("https://catfact.ninja/fact")
+                .method("GET")
+                .intervalSec(15)
+                .timeoutMs(5000)
+                .enabled(true)
+                .expectedStatusCode(200)
+                .expectedResponseContains("fact")
+                .createdAt(now.minusDays(4))
+                .updatedAt(now.minusHours(1))
+                .lastResponseTimeMs(180)
+                .build();
 
-                CheckResponse check4 = CheckResponse.builder().id(checkSequence.incrementAndGet())
-                                .name("payments-check").url("https://payments.example.com/health")
-                                .method("GET").intervalSec(20).timeoutMs(2000).enabled(true)
-                                .expectedStatusCode(200).expectedResponseContains("OK")
-                                .createdAt(now.minusDays(2)).updatedAt(now.minusHours(3))
-                                .lastResponseTimeMs(310).build();
+        CheckResponse check3 = CheckResponse.builder()
+                .id(checkSequence.incrementAndGet())
+                .name("dog-api-check")
+                .url("https://dog.ceo/api/breeds/image/random")
+                .method("GET")
+                .intervalSec(20)
+                .timeoutMs(5000)
+                .enabled(true)
+                .expectedStatusCode(200)
+                .expectedResponseContains("success")
+                .createdAt(now.minusDays(3))
+                .updatedAt(now.minusMinutes(45))
+                .lastResponseTimeMs(220)
+                .build();
 
-                CheckResponse check5 = CheckResponse.builder().id(checkSequence.incrementAndGet())
-                                .name("search-check").url("https://search.example.com/health")
-                                .method("GET").intervalSec(10).timeoutMs(1500).enabled(true)
-                                .expectedStatusCode(200).expectedResponseContains("alive")
-                                .createdAt(now.minusDays(1)).updatedAt(now.minusMinutes(30))
-                                .lastResponseTimeMs(95).build();
+        CheckResponse check4 = CheckResponse.builder()
+                .id(checkSequence.incrementAndGet())
+                .name("httpbin-status-check")
+                .url("https://httpbin.org/status/200")
+                .method("GET")
+                .intervalSec(30)
+                .timeoutMs(5000)
+                .enabled(true)
+                .expectedStatusCode(200)
+                .expectedResponseContains(null)
+                .createdAt(now.minusDays(2))
+                .updatedAt(now.minusHours(3))
+                .lastResponseTimeMs(300)
+                .build();
 
-                CheckResponse check6 = CheckResponse.builder().id(checkSequence.incrementAndGet())
-                                .name("cdn-check").url("https://cdn.example.com/ping").method("GET")
-                                .intervalSec(25).timeoutMs(1200).enabled(true)
-                                .expectedStatusCode(200).expectedResponseContains(null)
-                                .createdAt(now.minusDays(6)).updatedAt(now.minusHours(4))
-                                .lastResponseTimeMs(180).build();
+        CheckResponse check5 = CheckResponse.builder()
+                .id(checkSequence.incrementAndGet())
+                .name("jsonplaceholder-check")
+                .url("https://jsonplaceholder.typicode.com/posts/1")
+                .method("GET")
+                .intervalSec(25)
+                .timeoutMs(5000)
+                .enabled(true)
+                .expectedStatusCode(200)
+                .expectedResponseContains("userId")
+                .createdAt(now.minusDays(1))
+                .updatedAt(now.minusMinutes(20))
+                .lastResponseTimeMs(160)
+                .build();
 
-                CheckResponse check7 = CheckResponse.builder().id(checkSequence.incrementAndGet())
-                                .name("email-check").url("https://mail.example.com/health")
-                                .method("GET").intervalSec(45).timeoutMs(4000).enabled(true)
-                                .expectedStatusCode(200).expectedResponseContains("OK")
-                                .createdAt(now.minusDays(10)).updatedAt(now.minusHours(10))
-                                .lastResponseTimeMs(600).build();
+        CheckResponse check6 = CheckResponse.builder()
+                .id(checkSequence.incrementAndGet())
+                .name("disabled-demo-check")
+                .url("https://example.com")
+                .method("GET")
+                .intervalSec(60)
+                .timeoutMs(5000)
+                .enabled(false)
+                .expectedStatusCode(200)
+                .expectedResponseContains(null)
+                .createdAt(now.minusHours(12))
+                .updatedAt(now.minusHours(2))
+                .lastResponseTimeMs(90)
+                .build();
 
-                CheckResponse check8 = CheckResponse.builder().id(checkSequence.incrementAndGet())
-                                .name("notification-check").url("https://notify.example.com/health")
-                                .method("POST").intervalSec(30).timeoutMs(2500).enabled(true)
-                                .expectedStatusCode(200).expectedResponseContains("OK")
-                                .createdAt(now.minusDays(7)).updatedAt(now.minusHours(5))
-                                .lastResponseTimeMs(210).build();
+        checks.put(check1.getId(), check1);
+        checks.put(check2.getId(), check2);
+        checks.put(check3.getId(), check3);
+        checks.put(check4.getId(), check4);
+        checks.put(check5.getId(), check5);
+        checks.put(check6.getId(), check6);
 
-                CheckResponse check9 = CheckResponse.builder().id(checkSequence.incrementAndGet())
-                                .name("analytics-check").url("https://analytics.example.com/health")
-                                .method("GET").intervalSec(60).timeoutMs(5000).enabled(false)
-                                .expectedStatusCode(200).expectedResponseContains("OK")
-                                .createdAt(now.minusDays(20)).updatedAt(now.minusDays(1))
-                                .lastResponseTimeMs(1500).build();
+        AlertRuleResponse rule1 = AlertRuleResponse.builder()
+                .id(alertRuleSequence.incrementAndGet())
+                .check(check1)
+                .alertName("Gateway failure streak")
+                .ruleType(AlertRuleTypeEnum.FAILURE_STREAK_GTE)
+                .severity(IncidentSeverityEnum.WARNING)
+                .enabled(true)
+                .failureCount(3)
+                .message("Gateway is unavailable")
+                .details("Opens incident when check fails 3 times подряд")
+                .createdAt(now.minusDays(2))
+                .updatedAt(now.minusHours(1))
+                .build();
 
-                CheckResponse check10 = CheckResponse.builder().id(checkSequence.incrementAndGet())
-                                .name("gateway-check").url("https://gateway.example.com/health")
-                                .method("GET").intervalSec(5).timeoutMs(1000).enabled(true)
-                                .expectedStatusCode(200).expectedResponseContains("UP")
-                                .createdAt(now.minusHours(12)).updatedAt(now.minusMinutes(10))
-                                .lastResponseTimeMs(80).build();
+        AlertRuleResponse rule2 = AlertRuleResponse.builder()
+                .id(alertRuleSequence.incrementAndGet())
+                .check(check2)
+                .alertName("Catfact API unavailable")
+                .ruleType(AlertRuleTypeEnum.FAILURE_STREAK_GTE)
+                .severity(IncidentSeverityEnum.WARNING)
+                .enabled(true)
+                .failureCount(3)
+                .message("Catfact API is unavailable")
+                .details("Opens incident when catfact API fails 3 times подряд")
+                .createdAt(now.minusDays(2))
+                .updatedAt(now.minusMinutes(50))
+                .build();
 
-                checks.put(check1.getId(), check1);
-                checks.put(check2.getId(), check2);
-                checks.put(check3.getId(), check3);
-                checks.put(check4.getId(), check4);
-                checks.put(check5.getId(), check5);
-                checks.put(check6.getId(), check6);
-                checks.put(check7.getId(), check7);
-                checks.put(check8.getId(), check8);
-                checks.put(check9.getId(), check9);
-                checks.put(check10.getId(), check10);
+        AlertRuleResponse rule3 = AlertRuleResponse.builder()
+                .id(alertRuleSequence.incrementAndGet())
+                .check(check2)
+                .alertName("Catfact body mismatch")
+                .ruleType(AlertRuleTypeEnum.RESPONSE_BODY_CONTAINS)
+                .severity(IncidentSeverityEnum.INFO)
+                .enabled(true)
+                .expectedResponseContains("fact")
+                .failureCount(2)
+                .message("Catfact response body does not contain expected field")
+                .details("Expected response body to contain 'fact'")
+                .createdAt(now.minusDays(2))
+                .updatedAt(now.minusMinutes(40))
+                .build();
 
-                AlertResponse alert1 = AlertResponse.builder().id(alertSequence.incrementAndGet())
-                                .check(check1).status(AlertStatusEnum.NEW)
-                                .severity(AlertSeverityEnum.CRITICAL).message("Service is down")
-                                .details("Timeout after 5000ms").createdAt(now.minusMinutes(50))
-                                .updatedAt(now.minusMinutes(50)).acknowledgedAt(null)
-                                .acknowledgedBy(null).resolvedAt(null).build();
+        AlertRuleResponse rule4 = AlertRuleResponse.builder()
+                .id(alertRuleSequence.incrementAndGet())
+                .check(check3)
+                .alertName("Dog API unavailable")
+                .ruleType(AlertRuleTypeEnum.FAILURE_STREAK_GTE)
+                .severity(IncidentSeverityEnum.WARNING)
+                .enabled(true)
+                .failureCount(3)
+                .message("Dog API is unavailable")
+                .details("Opens incident when dog API fails 3 times подряд")
+                .createdAt(now.minusDays(1))
+                .updatedAt(now.minusHours(2))
+                .build();
 
-                AlertResponse alert2 = AlertResponse.builder().id(alertSequence.incrementAndGet())
-                                .check(check2).status(AlertStatusEnum.ACKNOWLEDGED)
-                                .severity(AlertSeverityEnum.WARNING).message("Auth slow")
-                                .details("Response time degraded").createdAt(now.minusHours(1))
-                                .updatedAt(now.minusMinutes(40))
-                                .acknowledgedAt(now.minusMinutes(40)).acknowledgedBy("admin")
-                                .resolvedAt(null).build();
+        AlertRuleResponse rule5 = AlertRuleResponse.builder()
+                .id(alertRuleSequence.incrementAndGet())
+                .check(check3)
+                .alertName("Dog API status mismatch")
+                .ruleType(AlertRuleTypeEnum.RESPONSE_BODY_CONTAINS)
+                .severity(IncidentSeverityEnum.INFO)
+                .enabled(true)
+                .expectedResponseContains("success")
+                .failureCount(2)
+                .message("Dog API response does not contain success")
+                .details("Expected response body to contain 'success'")
+                .createdAt(now.minusDays(1))
+                .updatedAt(now.minusHours(1))
+                .build();
 
-                AlertResponse alert3 = AlertResponse.builder().id(alertSequence.incrementAndGet())
-                                .check(check3).status(AlertStatusEnum.RESOLVED)
-                                .severity(AlertSeverityEnum.INFO).message("Billing recovered")
-                                .details("Service restored").createdAt(now.minusHours(3))
-                                .updatedAt(now.minusHours(1)).acknowledgedAt(now.minusHours(2))
-                                .acknowledgedBy("operator").resolvedAt(now.minusHours(1)).build();
+        AlertRuleResponse rule6 = AlertRuleResponse.builder()
+                .id(alertRuleSequence.incrementAndGet())
+                .check(check4)
+                .alertName("Httpbin status code mismatch")
+                .ruleType(AlertRuleTypeEnum.STATUS_CODE_NEQ)
+                .severity(IncidentSeverityEnum.CRITICAL)
+                .enabled(true)
+                .expectedStatusCode(200)
+                .failureCount(1)
+                .message("Httpbin returned unexpected status code")
+                .details("Expected HTTP status 200")
+                .createdAt(now.minusHours(20))
+                .updatedAt(now.minusHours(4))
+                .build();
 
-                AlertResponse alert4 = AlertResponse.builder().id(alertSequence.incrementAndGet())
-                                .check(check4).status(AlertStatusEnum.NEW)
-                                .severity(AlertSeverityEnum.CRITICAL).message("Payments down")
-                                .details("Connection refused").createdAt(now.minusMinutes(90))
-                                .updatedAt(now.minusMinutes(80)).build();
+        AlertRuleResponse rule7 = AlertRuleResponse.builder()
+                .id(alertRuleSequence.incrementAndGet())
+                .check(check5)
+                .alertName("JsonPlaceholder unavailable")
+                .ruleType(AlertRuleTypeEnum.FAILURE_STREAK_GTE)
+                .severity(IncidentSeverityEnum.WARNING)
+                .enabled(true)
+                .failureCount(3)
+                .message("JsonPlaceholder API is unavailable")
+                .details("Opens incident when JsonPlaceholder fails 3 times подряд")
+                .createdAt(now.minusHours(16))
+                .updatedAt(now.minusHours(3))
+                .build();
 
-                AlertResponse alert5 = AlertResponse.builder().id(alertSequence.incrementAndGet())
-                                .check(check5).status(AlertStatusEnum.ACKNOWLEDGED)
-                                .severity(AlertSeverityEnum.WARNING).message("Search latency high")
-                                .details("Over 1000ms response").createdAt(now.minusMinutes(70))
-                                .updatedAt(now.minusMinutes(60))
-                                .acknowledgedAt(now.minusMinutes(60)).acknowledgedBy("devops")
-                                .build();
+        AlertRuleResponse rule8 = AlertRuleResponse.builder()
+                .id(alertRuleSequence.incrementAndGet())
+                .check(check5)
+                .alertName("JsonPlaceholder body mismatch")
+                .ruleType(AlertRuleTypeEnum.RESPONSE_BODY_CONTAINS)
+                .severity(IncidentSeverityEnum.INFO)
+                .enabled(true)
+                .expectedResponseContains("userId")
+                .failureCount(2)
+                .message("JsonPlaceholder response body does not contain userId")
+                .details("Expected response body to contain 'userId'")
+                .createdAt(now.minusHours(15))
+                .updatedAt(now.minusHours(2))
+                .build();
 
-                AlertResponse alert6 = AlertResponse.builder().id(alertSequence.incrementAndGet())
-                                .check(check6).status(AlertStatusEnum.NEW)
-                                .severity(AlertSeverityEnum.INFO).message("CDN spike")
-                                .details("High traffic detected").createdAt(now.minusHours(2))
-                                .updatedAt(now.minusHours(2)).build();
+        AlertRuleResponse rule9 = AlertRuleResponse.builder()
+                .id(alertRuleSequence.incrementAndGet())
+                .check(check6)
+                .alertName("Disabled check failure rule")
+                .ruleType(AlertRuleTypeEnum.FAILURE_STREAK_GTE)
+                .severity(IncidentSeverityEnum.INFO)
+                .enabled(true)
+                .failureCount(3)
+                .message("Disabled demo check failed")
+                .details("This rule should not fire while the check is disabled")
+                .createdAt(now.minusHours(12))
+                .updatedAt(now.minusHours(1))
+                .build();
 
-                AlertResponse alert7 = AlertResponse.builder().id(alertSequence.incrementAndGet())
-                                .check(check7).status(AlertStatusEnum.RESOLVED)
-                                .severity(AlertSeverityEnum.CRITICAL)
-                                .message("Email service restored").details("SMTP fixed")
-                                .createdAt(now.minusDays(1)).updatedAt(now.minusHours(20))
-                                .acknowledgedAt(now.minusHours(22)).acknowledgedBy("admin")
-                                .resolvedAt(now.minusHours(20)).build();
+        alertRules.put(rule1.getId(), rule1);
+        alertRules.put(rule2.getId(), rule2);
+        alertRules.put(rule3.getId(), rule3);
+        alertRules.put(rule4.getId(), rule4);
+        alertRules.put(rule5.getId(), rule5);
+        alertRules.put(rule6.getId(), rule6);
+        alertRules.put(rule7.getId(), rule7);
+        alertRules.put(rule8.getId(), rule8);
+        alertRules.put(rule9.getId(), rule9);
 
-                AlertResponse alert8 = AlertResponse.builder().id(alertSequence.incrementAndGet())
-                                .check(check8).status(AlertStatusEnum.NEW)
-                                .severity(AlertSeverityEnum.WARNING).message("Notification delay")
-                                .details("Queue backlog").createdAt(now.minusHours(5))
-                                .updatedAt(now.minusHours(4)).build();
+        IncidentResponse incident1 = IncidentResponse.builder()
+                .id(incidentSequence.incrementAndGet())
+                .check(check2)
+                .alertRule(rule2)
+                .status(IncidentStatusEnum.OPEN)
+                .severity(IncidentSeverityEnum.WARNING)
+                .message("Catfact API is unavailable")
+                .details("Seed demo incident with OPEN status")
+                .openedAt(now.minusMinutes(40))
+                .updatedAt(now.minusMinutes(40))
+                .build();
 
-                AlertResponse alert9 = AlertResponse.builder().id(alertSequence.incrementAndGet())
-                                .check(check9).status(AlertStatusEnum.NEW)
-                                .severity(AlertSeverityEnum.CRITICAL).message("Analytics down")
-                                .details("Service unreachable").createdAt(now.minusDays(2))
-                                .updatedAt(now.minusDays(1)).build();
+        IncidentResponse incident2 = IncidentResponse.builder()
+                .id(incidentSequence.incrementAndGet())
+                .check(check3)
+                .alertRule(rule4)
+                .status(IncidentStatusEnum.ACKNOWLEDGED)
+                .severity(IncidentSeverityEnum.WARNING)
+                .message("Dog API had intermittent failures")
+                .details("Seed demo incident with ACKNOWLEDGED status")
+                .openedAt(now.minusHours(2))
+                .updatedAt(now.minusHours(1))
+                .acknowledgedAt(now.minusHours(1))
+                .acknowledgedBy("admin")
+                .build();
 
-                AlertResponse alert10 = AlertResponse.builder().id(alertSequence.incrementAndGet())
-                                .check(check10).status(AlertStatusEnum.ACKNOWLEDGED)
-                                .severity(AlertSeverityEnum.INFO).message("Gateway stable")
-                                .details("Recovered quickly").createdAt(now.minusMinutes(30))
-                                .updatedAt(now.minusMinutes(10))
-                                .acknowledgedAt(now.minusMinutes(15)).acknowledgedBy("system")
-                                .build();
+        IncidentResponse incident3 = IncidentResponse.builder()
+                .id(incidentSequence.incrementAndGet())
+                .check(check4)
+                .alertRule(rule6)
+                .status(IncidentStatusEnum.RESOLVED)
+                .severity(IncidentSeverityEnum.CRITICAL)
+                .message("Httpbin status issue resolved")
+                .details("Seed demo incident with RESOLVED status")
+                .openedAt(now.minusHours(6))
+                .updatedAt(now.minusHours(2))
+                .acknowledgedAt(now.minusHours(5))
+                .acknowledgedBy("devops")
+                .resolvedAt(now.minusHours(2))
+                .build();
 
-                alerts.put(alert1.getId(), alert1);
-                alerts.put(alert2.getId(), alert2);
-                alerts.put(alert3.getId(), alert3);
-                alerts.put(alert4.getId(), alert4);
-                alerts.put(alert5.getId(), alert5);
-                alerts.put(alert6.getId(), alert6);
-                alerts.put(alert7.getId(), alert7);
-                alerts.put(alert8.getId(), alert8);
-                alerts.put(alert9.getId(), alert9);
-                alerts.put(alert10.getId(), alert10);
-        }
+        IncidentResponse incident4 = IncidentResponse.builder()
+                .id(incidentSequence.incrementAndGet())
+                .check(check5)
+                .alertRule(rule7)
+                .status(IncidentStatusEnum.CLOSED)
+                .severity(IncidentSeverityEnum.WARNING)
+                .message("JsonPlaceholder temporary issue")
+                .details("Seed demo incident with CLOSED status")
+                .openedAt(now.minusHours(12))
+                .updatedAt(now.minusHours(9))
+                .acknowledgedAt(now.minusHours(11))
+                .acknowledgedBy("system")
+                .resolvedAt(now.minusHours(10))
+                .closedAt(now.minusHours(9))
+                .build();
+
+        // incidents.put(incident1.getId(), incident1);
+        // incidents.put(incident2.getId(), incident2);
+        // incidents.put(incident3.getId(), incident3);
+        // incidents.put(incident4.getId(), incident4);
+    }
 }

@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
 import edu.rutmiit.demo.uptimerobotapicontract.config.UptimeRobotApiContractConfig;
-import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertResponse;
+import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertRuleResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckRequest;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.ErrorResponse;
+import edu.rutmiit.demo.uptimerobotapicontract.dto.IncidentResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.PatchCheckRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -44,9 +44,10 @@ public interface CheckApi {
 
         @Operation(summary = "Список чеков",
                         description = """
-                                        Возвращает постраничный список чеков с HATEOS-ссылками.
-                                        Ссыки prev/next позвояют клиенту навигировать по страницам без знания офсетов.
-                                                """,
+                                        Возвращает постраничный список чеков с HATEOAS-ссылками.
+                                        Поддерживает фильтрацию по ID, названию, URL, методу и состоянию enabled.
+                                        Ссылки prev/next позволяют клиенту навигировать по страницам без знания офсетов.
+                                        """,
                         security = @SecurityRequirement(
                                         name = UptimeRobotApiContractConfig.SECURITY_SCHEME_BEARER))
         @ApiResponse(responseCode = "200", description = "Список чеков")
@@ -58,14 +59,16 @@ public interface CheckApi {
                                         example = "20") @RequestParam(defaultValue = "20") int size,
                         @Parameter(description = "Фильтр по ID чека") @RequestParam(
                                         required = false) Long checkId,
-                        @Parameter(description = "Фильтр по дате создания чека") @RequestParam(
-                                        required = false) @DateTimeFormat(
-                                                        iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime date,
-                        @Parameter(description = "Фильтр чеков по url сервиса") @RequestParam(
-                                        required = false) String url,
-                        @Parameter(description = "Поиск чека по названию (substring, case-insensitive)",
+                        @Parameter(description = "Поиск по названию чека (substring, case-insensitive)",
                                         example = "monitoring") @RequestParam(
-                                                        required = false) String titleSearch);
+                                                        required = false) String name,
+                        @Parameter(description = "Фильтр по URL сервиса") @RequestParam(
+                                        required = false) String url,
+                        @Parameter(description = "Фильтр по HTTP-методу",
+                                        example = "GET") @RequestParam(
+                                                        required = false) String method,
+                        @Parameter(description = "Фильтр по состоянию enabled") @RequestParam(
+                                        required = false) Boolean enabled);
 
         @Operation(summary = "Получает чек по ID",
                         security = @SecurityRequirement(
@@ -77,29 +80,55 @@ public interface CheckApi {
         EntityModel<CheckResponse> getCheckById(@Parameter(description = "ID чека", required = true,
                         example = "1") @PathVariable("id") Long id);
 
-        @Operation(summary = "Получает чек по ID",
+        @Operation(summary = "Получает правила алертов по ID чека",
                         security = @SecurityRequirement(
                                         name = UptimeRobotApiContractConfig.SECURITY_SCHEME_BEARER))
-        @ApiResponse(responseCode = "200", description = "Чек найден")
+        @ApiResponse(responseCode = "200", description = "Правила алертов найдены")
         @ApiResponse(responseCode = "404", description = "Чек не найден",
                         content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-        @GetMapping("/{id}/alerts")
-        PagedModel<EntityModel<AlertResponse>> getAlertsByCheckId(
+        @GetMapping("/{id}/alert-rules")
+        PagedModel<EntityModel<AlertRuleResponse>> getAlertRulesByCheckId(
                         @Parameter(description = "ID чека", required = true,
                                         example = "1") @PathVariable("id") Long id,
                         @Parameter(description = "Номер страницы (0..N)",
                                         example = "0") @RequestParam(defaultValue = "0") int page,
-                        @Parameter(description = "Размер страницы",
-                                        example = "20") @RequestParam(defaultValue = "20") int size,
-                        @Parameter(description = "Фильтр по ID алерта") @RequestParam(
-                                        required = false) Long alerdId,
-                        @Parameter(description = "Фильтр по дате создания алерта") @RequestParam(
+                        @Parameter(description = "Размер страницы", example = "20") @RequestParam(
+                                        defaultValue = "20") int size,
+                        @Parameter(description = "Фильтр по ID правила алерта") @RequestParam(
+                                        required = false) Long alertRuleId,
+                        @Parameter(description = "Фильтр по дате создания правила") @RequestParam(
                                         required = false) @DateTimeFormat(
                                                         iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime date,
-                        @Parameter(description = "Поиск алертов по названию чека (substring, case-insensitive)",
+                        @Parameter(description = "Поиск правил по названию",
                                         example = "monitoring") @RequestParam(
                                                         required = false) String titleSearch,
-                        @Parameter(description = "Поиск алертов по урлу чека",
+                        @Parameter(description = "Поиск правил по url чека",
+                                        example = "https://google.com/health") @RequestParam(
+                                                        required = false) String url);
+
+        @Operation(summary = "Получает инциденты по ID чека",
+                        security = @SecurityRequirement(
+                                        name = UptimeRobotApiContractConfig.SECURITY_SCHEME_BEARER))
+        @ApiResponse(responseCode = "200", description = "Инциденты найдены")
+        @ApiResponse(responseCode = "404", description = "Чек не найден",
+                        content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        @GetMapping("/{id}/incidents")
+        PagedModel<EntityModel<IncidentResponse>> getIncidentsByCheckId(
+                        @Parameter(description = "ID чека", required = true,
+                                        example = "1") @PathVariable("id") Long id,
+                        @Parameter(description = "Номер страницы (0..N)",
+                                        example = "0") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Размер страницы", example = "20") @RequestParam(
+                                        defaultValue = "20") int size,
+                        @Parameter(description = "Фильтр по ID инцидента") @RequestParam(
+                                        required = false) Long incidentId,
+                        @Parameter(description = "Фильтр по дате создания инцидента") @RequestParam(
+                                        required = false) @DateTimeFormat(
+                                                        iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime date,
+                        @Parameter(description = "Поиск инцидентов по названию",
+                                        example = "monitoring") @RequestParam(
+                                                        required = false) String titleSearch,
+                        @Parameter(description = "Поиск инцидентов по url чека",
                                         example = "https://google.com/health") @RequestParam(
                                                         required = false) String url);
 
@@ -146,7 +175,7 @@ public interface CheckApi {
                         @Valid @RequestBody PatchCheckRequest request);
 
         @Operation(summary = "Удалить чек",
-                        description = "Удаляет чек и все его алерты (каскадное удаление)",
+                        description = "Удаляет чек и все его правила алертов и инциденты (каскадное удаление)",
                         security = @SecurityRequirement(
                                         name = UptimeRobotApiContractConfig.SECURITY_SCHEME_BEARER))
         @ApiResponse(responseCode = "204", description = "Чек удалён")

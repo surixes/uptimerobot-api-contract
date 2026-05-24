@@ -24,39 +24,32 @@ public class CheckDataFetcher {
     public CheckDataFetcher(CheckService checkService) {
         this.checkService = checkService;
     }
-    
+
     @DgsQuery
     public CheckResponse check(@InputArgument String id) {
         return checkService.findById(Long.parseLong(id));
     }
 
     @DgsQuery
-    public CheckConnectionGql checks(
-            @InputArgument CheckFilterGql filter,
-            @InputArgument Integer page,
-            @InputArgument Integer size) {
+    public CheckConnectionGql checks(@InputArgument CheckFilterGql filter,
+            @InputArgument Integer page, @InputArgument Integer size) {
 
         int pageNum = page != null ? page : 0;
         int sizeNum = size != null ? size : 20;
 
-        Long checkId = filter != null && filter.checkId() != null ? Long.parseLong(filter.checkId()) : null;
+        Long checkId = filter != null && filter.checkId() != null ? Long.parseLong(filter.checkId())
+                : null;
 
-        PagedResponse<CheckResponse> paged = checkService.findAll(
-            checkId,
-            filter != null ? filter.date() : null,
-            filter != null ? filter.url() : null,
-            filter != null ? filter.titleSearch() : null,
-            pageNum,
-            sizeNum
-        );
+        PagedResponse<CheckResponse> paged = checkService.findAll(checkId,
+                filter != null ? filter.name() : null, filter != null ? filter.url() : null,
+                filter != null ? filter.method() : null, filter != null ? filter.enabled() : null,
+                pageNum, sizeNum);
 
-        return new CheckConnectionGql(
-                    paged.content(),
-                    new PageInfoGql(paged.pageNumber(), paged.pageSize(), paged.totalPages(),paged.last()),
-                    (int) paged.totalElements()
-                );
+        return new CheckConnectionGql(paged.content(), new PageInfoGql(paged.pageNumber(),
+                paged.pageSize(), paged.totalPages(), paged.last()),
+                Math.toIntExact(paged.totalElements()));
     }
-    
+
     @DgsMutation
     public CheckResponse createCheck(@InputArgument CreateCheckInputGql input) {
         CheckRequest request = new CheckRequest(input.name(), input.url(), input.method(),
@@ -66,7 +59,8 @@ public class CheckDataFetcher {
     }
 
     @DgsMutation
-    public CheckResponse updateCheck(@InputArgument String id, @InputArgument UpdateCheckInputGql input) {
+    public CheckResponse updateCheck(@InputArgument String id,
+            @InputArgument UpdateCheckInputGql input) {
         CheckRequest request = new CheckRequest(input.name(), input.url(), input.method(),
                 input.intervalSec(), input.timeoutMs(), input.enabled(), input.expectedStatusCode(),
                 input.expectedResponseContains());
@@ -74,13 +68,8 @@ public class CheckDataFetcher {
     }
 
     @DgsMutation
-    public boolean deleteCheck(@InputArgument String id) {
-        checkService.delete(Long.parseLong(id));
-        return true;
-    }
-
-    @DgsMutation
-    public CheckResponse patchCheck(@InputArgument String id, @InputArgument PatchCheckInputGql input) {
+    public CheckResponse patchCheck(@InputArgument String id,
+            @InputArgument PatchCheckInputGql input) {
         PatchCheckRequest request = new PatchCheckRequest(input.name(), input.url(), input.method(),
                 input.intervalSec(), input.timeoutMs(), input.enabled(), input.expectedStatusCode(),
                 input.expectedResponseContains());
@@ -88,8 +77,13 @@ public class CheckDataFetcher {
     }
 
     @DgsMutation
+    public Boolean deleteCheck(@InputArgument String id) {
+        checkService.delete(Long.parseLong(id));
+        return true;
+    }
+
+    @DgsMutation
     public CheckResponse runCheckNow(@InputArgument String id) {
         return checkService.runCheckNow(Long.parseLong(id));
     }
-
 }

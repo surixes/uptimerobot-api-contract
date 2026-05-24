@@ -1,7 +1,6 @@
 package edu.rutmiit.demo.uptimerobotrest.graphql.types;
 
 public record PatchCheckInputGql(
-    String id,
     String name,
     String url,
     String method,
