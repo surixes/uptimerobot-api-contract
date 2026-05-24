@@ -16,9 +16,8 @@ public class RootController {
     public RepresentationModel<?> getRoot() {
         RepresentationModel<?> rootModel = new RepresentationModel<>();
         rootModel.add(linkTo(methodOn(CheckController.class).getAllChecks(0, 20, null, null, null,
-                null)).withRel("checks"),
-                linkTo(methodOn(AlertController.class).getAllAlerts(null, null, null, null, null, 0,
-                        20)).withRel("alerts"));
+                null, null)).withRel("checks"),
+                linkTo(methodOn(AlertRuleController.class).getAllAlertRules(null, null, null, null, null, null, 0, 20)).withRel("alerts"));
         return rootModel;
     }
 }

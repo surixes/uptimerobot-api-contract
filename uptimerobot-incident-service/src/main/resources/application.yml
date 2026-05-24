@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: audit-service
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 2000    # первая попытка через 2 сек
+          max-attempts: 3           # максимум 3 попытки
+          multiplier: 2.0           # каждая следующая x2
+server:
+  port: 8081           # не конфликтует с demo-rest (8080)

@@ -13,6 +13,8 @@
 
         # Собрать только контракт (если менял только его)
         .\mvnw install -pl books-api-contract
+
+        mvn -f uptimerobot-api-rest/pom.xml spring-boot:run
     -->
 
     <groupId>edu.rutmiit.demo</groupId>
@@ -23,7 +25,10 @@
 
     <modules>
         <module>uptimerobot-api-contract</module>
+        <module>uptimerobot-events-contract</module>
+
         <module>uptimerobot-api-rest</module>
+        <module>uptimerobot-incident-service</module>
     </modules>
 
 </project>

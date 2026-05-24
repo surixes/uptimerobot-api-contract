@@ -55,8 +55,4 @@ public class CheckResponse extends RepresentationModel<CheckResponse> {
     @Schema(description = "Время ожидания ответа в секундах от ресурса в последний раз",
             example = "3")
     private final Integer lastResponseTimeMs;
-
-    @Schema(description = "Сколько раз подряд чек завершился неудачей без единого успешного результата между ними",
-            example = "5")
-    private final Integer consecutiveFailures;
 }

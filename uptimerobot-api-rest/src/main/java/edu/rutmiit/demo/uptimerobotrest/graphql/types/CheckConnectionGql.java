@@ -6,5 +6,5 @@ import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckResponse;
 public record CheckConnectionGql(
     List<CheckResponse> items,
     PageInfoGql pageInfo,
-    Integer totalElements    
+    Integer totalElements
 ) {}

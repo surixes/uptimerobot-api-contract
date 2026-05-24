@@ -9,14 +9,16 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertResponse;
+import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertRuleResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckRequest;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckResponse;
+import edu.rutmiit.demo.uptimerobotapicontract.dto.IncidentResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.PagedResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.PatchCheckRequest;
 import edu.rutmiit.demo.uptimerobotapicontract.endpoints.CheckApi;
-import edu.rutmiit.demo.uptimerobotrest.assemblers.AlertModelAssembler;
+import edu.rutmiit.demo.uptimerobotrest.assemblers.AlertRuleModelAssembler;
 import edu.rutmiit.demo.uptimerobotrest.assemblers.CheckModelAssembler;
+import edu.rutmiit.demo.uptimerobotrest.assemblers.IncidentModelAssembler;
 import edu.rutmiit.demo.uptimerobotrest.service.CheckService;
 
 @RestController
@@ -24,29 +26,36 @@ public class CheckController implements CheckApi {
 
     private final CheckService checkService;
     private final CheckModelAssembler checkModelAssembler;
-    private final AlertModelAssembler alertModelAssembler;
+    private final AlertRuleModelAssembler alertRuleModelAssembler;
+    private final IncidentModelAssembler incidentModelAssembler;
     private final PagedResourcesAssembler<CheckResponse> pagedCheckAssembler;
-    private final PagedResourcesAssembler<AlertResponse> pagedAlertAssembler;
+    private final PagedResourcesAssembler<AlertRuleResponse> pagedAlertRuleAssembler;
+    private final PagedResourcesAssembler<IncidentResponse> pagedIncidentAssembler;
 
     public CheckController(CheckService checkService,
             PagedResourcesAssembler<CheckResponse> pagedCheckAssembler,
             CheckModelAssembler checkModelAssembler,
-            PagedResourcesAssembler<AlertResponse> pagedAlertAssembler,
-            AlertModelAssembler alertModelAssembler) {
+            PagedResourcesAssembler<AlertRuleResponse> pagedAlertRuleAssembler,
+            AlertRuleModelAssembler alertRuleModelAssembler,
+            PagedResourcesAssembler<IncidentResponse> pagedIncidentAssembler,
+            IncidentModelAssembler incidentModelAssembler) {
         this.checkService = checkService;
         this.pagedCheckAssembler = pagedCheckAssembler;
         this.checkModelAssembler = checkModelAssembler;
-        this.pagedAlertAssembler = pagedAlertAssembler;
-        this.alertModelAssembler = alertModelAssembler;
+        this.pagedAlertRuleAssembler = pagedAlertRuleAssembler;
+        this.alertRuleModelAssembler = alertRuleModelAssembler;
+        this.pagedIncidentAssembler = pagedIncidentAssembler;
+        this.incidentModelAssembler = incidentModelAssembler;
     }
 
     @Override
-    public PagedModel<EntityModel<CheckResponse>> getAllChecks(int page, int size, Long checkId,
-            OffsetDateTime date, String url, String searchTitle) {
-        PagedResponse<CheckResponse> paged =
-                checkService.findAll(checkId, date, searchTitle, url, page, size);
+    public PagedModel<EntityModel<CheckResponse>> getAllChecks(int page, int size, Long checkId, String name, String url, String method, Boolean enabled) {
+
+        PagedResponse<CheckResponse> paged = checkService.findAll(checkId, name, url, method, enabled, page, size);
+
         Page<CheckResponse> springPage = new PageImpl<>(paged.content(),
                 PageRequest.of(paged.pageNumber(), paged.pageSize()), paged.totalElements());
+
         return pagedCheckAssembler.toModel(springPage, checkModelAssembler);
     }
 
@@ -56,15 +65,33 @@ public class CheckController implements CheckApi {
     }
 
     @Override
-    public PagedModel<EntityModel<AlertResponse>> getAlertsByCheckId(Long id, int page, int size,
-            Long alertId, OffsetDateTime date, String titleSearch, String url) {
+    public PagedModel<EntityModel<AlertRuleResponse>> getAlertRulesByCheckId(Long id, int page,
+            int size, Long alertRuleId, OffsetDateTime date, String titleSearch, String url) {
+
         checkService.findById(id);
-        PagedResponse<AlertResponse> paged =
-                checkService.findByCheckId(id, page, size, alertId, date, titleSearch, url);
-        Page<AlertResponse> springPage = new PageImpl<>(paged.content(),
+
+        PagedResponse<AlertRuleResponse> paged = checkService.findAlertRulesByCheckId(id, page,
+                size, alertRuleId, date, titleSearch, url);
+
+        Page<AlertRuleResponse> springPage = new PageImpl<>(paged.content(),
                 PageRequest.of(paged.pageNumber(), paged.pageSize()), paged.totalElements());
 
-        return pagedAlertAssembler.toModel(springPage, alertModelAssembler);
+        return pagedAlertRuleAssembler.toModel(springPage, alertRuleModelAssembler);
+    }
+
+    @Override
+    public PagedModel<EntityModel<IncidentResponse>> getIncidentsByCheckId(Long id, int page,
+            int size, Long incidentId, OffsetDateTime date, String titleSearch, String url) {
+
+        checkService.findById(id);
+
+        PagedResponse<IncidentResponse> paged = checkService.findIncidentsByCheckId(id, page, size,
+                incidentId, date, titleSearch, url);
+
+        Page<IncidentResponse> springPage = new PageImpl<>(paged.content(),
+                PageRequest.of(paged.pageNumber(), paged.pageSize()), paged.totalElements());
+
+        return pagedIncidentAssembler.toModel(springPage, incidentModelAssembler);
     }
 
     @Override
