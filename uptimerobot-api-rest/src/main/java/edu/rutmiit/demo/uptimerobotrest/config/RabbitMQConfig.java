@@ -4,6 +4,7 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.ExchangeBuilder;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -18,6 +19,9 @@ public class RabbitMQConfig {
 
     public static final String INCIDENT_EVENTS_QUEUE = "q.incident.events";
     public static final String INCIDENT_EVENTS_DLQ = "q.incident.events.dlq";
+
+    public static final String SLA_EVENTS_QUEUE = "q.service.sla-events";
+    public static final String SLA_EVENTS_DLQ = "q.service.sla-events.dlq";
 
     @Bean
     public MessageConverter jsonMessageConverter() {
@@ -47,4 +51,27 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(incidentEventsQueue).to(eventsExchange)
                 .with(RoutingKeys.ALL_INCIDENT_EVENTS);
     }
+
+    @Bean
+    public Queue slaEventsQueue() {
+        return QueueBuilder
+                .durable(SLA_EVENTS_QUEUE)
+                .deadLetterExchange(RoutingKeys.EXCHANGE + ".dlx")
+                .deadLetterRoutingKey(SLA_EVENTS_DLQ)
+                .build();
+    }
+
+    @Bean
+    public Queue slaEventsDlq() {
+        return QueueBuilder.durable(SLA_EVENTS_DLQ).build();
+    }
+
+    @Bean
+    public Binding slaEventsBinding(Queue slaEventsQueue, TopicExchange eventsExchange) {
+        return BindingBuilder
+                .bind(slaEventsQueue)
+                .to(eventsExchange)
+                .with(RoutingKeys.ALL_SLA_EVENTS);
+    }
+
 }
