@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UptimeRobot уведомления</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0e1420;
+            color: #e6edf7;
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 18px 28px;
+            background: #151d2c;
+            border-bottom: 1px solid #253149;
+        }
+
+        .title-block {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e2b42;
+            font-size: 22px;
+        }
+
+        h1 {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            margin-top: 2px;
+            color: #8793a8;
+            font-size: 13px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            min-width: 28px;
+            height: 28px;
+            padding: 0 9px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #3877ff;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 150px;
+            padding: 7px 13px;
+            border-radius: 999px;
+            background: #1d2739;
+            border: 1px solid #2b3954;
+            color: #c9d3e4;
+            font-size: 13px;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+
+        .status.connected .dot {
+            background: #22c55e;
+            box-shadow: 0 0 12px #22c55e;
+        }
+
+        .status.reconnecting .dot {
+            background: #f59e0b;
+            box-shadow: 0 0 12px #f59e0b;
+        }
+
+        .button {
+            border: 1px solid #2b3954;
+            background: #1d2739;
+            color: #c9d3e4;
+            border-radius: 10px;
+            padding: 8px 13px;
+            cursor: pointer;
+            font: inherit;
+            font-size: 13px;
+        }
+
+        .button:hover {
+            background: #26344d;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 26px 16px 44px;
+        }
+
+        .empty {
+            padding: 70px 20px;
+            text-align: center;
+            color: #77849a;
+        }
+
+        .empty-icon {
+            margin-bottom: 14px;
+            font-size: 54px;
+        }
+
+        .empty-title {
+            margin-bottom: 6px;
+            color: #c9d3e4;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .empty-text {
+            max-width: 520px;
+            margin: 0 auto;
+            font-size: 14px;
+        }
+
+        .notification {
+            position: relative;
+            display: flex;
+            gap: 14px;
+            margin-bottom: 12px;
+            padding: 16px 18px;
+            border-radius: 14px;
+            background: #182235;
+            border: 1px solid #2a3651;
+            overflow: hidden;
+            animation: appear 0.25s ease-out;
+        }
+
+        .notification::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #3877ff;
+        }
+
+        .notification.success::before {
+            background: #22c55e;
+        }
+
+        .notification.warning::before {
+            background: #f59e0b;
+        }
+
+        .notification.danger::before {
+            background: #ef4444;
+        }
+
+        .notification.info::before {
+            background: #38bdf8;
+        }
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-icon {
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #22304a;
+            font-size: 21px;
+        }
+
+        .notification-body {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .notification-title {
+            margin-bottom: 4px;
+            color: #f1f5f9;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .notification-description {
+            color: #b8c3d4;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .notification-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 9px;
+            color: #77849a;
+            font-size: 12px;
+        }
+
+        .log-panel {
+            display: none;
+            margin-top: 18px;
+            max-height: 220px;
+            overflow: auto;
+            padding: 14px;
+            border: 1px solid #2a3651;
+            border-radius: 14px;
+            background: #121a29;
+            color: #8fa0b7;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+        }
+
+        .log-panel.visible {
+            display: block;
+        }
+
+        .log-entry {
+            padding: 2px 0;
+        }
+
+        .log-entry.info {
+            color: #65d98b;
+        }
+
+        .log-entry.warn {
+            color: #fbbf24;
+        }
+
+        .log-entry.error {
+            color: #f87171;
+        }
+
+        .footer-actions {
+            margin-top: 26px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="title-block">
+        <div class="logo">📡</div>
+        <div>
+            <h1>UptimeRobot уведомления</h1>
+            <div class="subtitle">WebSocket · RabbitMQ · события проверок, инцидентов, правил и SLA</div>
+        </div>
+    </div>
+    <div class="header-actions">
+        <div class="badge" id="badge">0</div>
+        <div class="status disconnected" id="status">
+            <div class="dot"></div>
+            <span id="status-text">Отключено</span>
+        </div>
+        <button class="button" onclick="clearAll()">Очистить</button>
+    </div>
+</header>
+<main class="container">
+    <div class="empty" id="empty">
+        <div class="empty-icon">🔕</div>
+        <div class="empty-title">Пока нет уведомлений</div>
+        <div class="empty-text">Запустите сервисы проекта и выполните действие через REST или GraphQL: создайте проверку, правило оповещения, дождитесь выполнения проверки или расчёта SLA.</div>
+    </div>
+    <div id="notifications"></div>
+    <div class="footer-actions">
+        <button class="button" onclick="toggleLog()">Показать лог подключения</button>
+    </div>
+    <div class="log-panel" id="log"></div>
+</main>
+<script>
+    const WS_URL = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws/notifications`;
+    const RECONNECT_BASE_MS = 1000;
+    const RECONNECT_MAX_MS = 30000;
+
+    let ws = null;
+    let reconnectAttempt = 0;
+    let reconnectTimer = null;
+    let notificationCount = 0;
+
+    const ICONS = {
+        "check-plus": "✅",
+        "check-edit": "✏️",
+        "check-remove": "🗑️",
+        "check-run": "⚙️",
+        "rule": "🚨",
+        "rule-remove": "🧹",
+        "incident": "🔥",
+        "incident-ack": "👁️",
+        "incident-ok": "🟢",
+        "sla": "📈",
+        "bell": "🔔"
+    };
+
+    const status = document.getElementById("status");
+    const statusText = document.getElementById("status-text");
+    const badge = document.getElementById("badge");
+    const list = document.getElementById("notifications");
+    const empty = document.getElementById("empty");
+    const log = document.getElementById("log");
+
+    function connect() {
+        if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+            return;
+        }
+
+        setStatus("reconnecting", "Подключение...");
+        addLog("info", `Подключение к ${WS_URL}`);
+
+        ws = new WebSocket(WS_URL);
+
+        ws.onopen = () => {
+            reconnectAttempt = 0;
+            setStatus("connected", "Подключено");
+            addLog("info", "WebSocket подключён");
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === "CONNECTED") {
+                    addLog("info", `${data.message}, подключений: ${data.activeConnections}`);
+                    return;
+                }
+                if (data.type === "PONG") {
+                    addLog("info", "Pong получен");
+                    return;
+                }
+                if (data.type === "NOTIFICATION") {
+                    addNotification(data);
+                }
+            } catch (e) {
+                addLog("error", `Ошибка чтения сообщения: ${e.message}`);
+            }
+        };
+
+        ws.onclose = (event) => {
+            setStatus("disconnected", "Отключено");
+            addLog("warn", `Соединение закрыто: ${event.code || "-"}`);
+            scheduleReconnect();
+        };
+
+        ws.onerror = () => {
+            addLog("error", "Ошибка WebSocket");
+        };
+    }
+
+    function scheduleReconnect() {
+        const delay = Math.min(RECONNECT_BASE_MS * Math.pow(2, reconnectAttempt), RECONNECT_MAX_MS);
+        reconnectAttempt++;
+        setStatus("reconnecting", `Повтор через ${Math.round(delay / 1000)}с`);
+        addLog("warn", `Повторное подключение #${reconnectAttempt} через ${delay} мс`);
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(connect, delay);
+    }
+
+    function setStatus(state, text) {
+        status.className = `status ${state}`;
+        statusText.textContent = text;
+    }
+
+    function addNotification(data) {
+        empty.style.display = "none";
+        notificationCount++;
+        badge.textContent = notificationCount;
+        document.title = `(${notificationCount}) UptimeRobot уведомления`;
+
+        const card = document.createElement("div");
+        card.className = `notification ${data.level || "info"}`;
+
+        const icon = ICONS[data.icon] || ICONS.bell;
+        const receivedAt = data.receivedAt ? new Date(data.receivedAt).toLocaleTimeString("ru-RU") : new Date().toLocaleTimeString("ru-RU");
+
+        card.innerHTML = `
+            <div class="notification-icon">${icon}</div>
+            <div class="notification-body">
+                <div class="notification-title">${escapeHtml(data.title)}</div>
+                <div class="notification-description">${escapeHtml(data.description)}</div>
+                <div class="notification-meta">
+                    <span>${receivedAt}</span>
+                    <span>${escapeHtml(data.source)}</span>
+                    <span>${escapeHtml(data.eventType)}</span>
+                </div>
+            </div>`;
+
+        list.prepend(card);
+    }
+
+    function clearAll() {
+        list.innerHTML = "";
+        notificationCount = 0;
+        badge.textContent = "0";
+        empty.style.display = "";
+        document.title = "UptimeRobot уведомления";
+    }
+
+    function addLog(level, message) {
+        const entry = document.createElement("div");
+        entry.className = `log-entry ${level}`;
+        entry.textContent = `[${new Date().toLocaleTimeString("ru-RU")}] ${message}`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function toggleLog() {
+        log.classList.toggle("visible");
+    }
+
+    function escapeHtml(value) {
+        const div = document.createElement("div");
+        div.textContent = value || "";
+        return div.innerHTML;
+    }
+
+    connect();
+</script>
+</body>
+</html>

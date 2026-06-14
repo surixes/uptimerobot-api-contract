@@ -33,7 +33,7 @@ public class InMemoryStorage {
         CheckResponse check1 = CheckResponse.builder()
                 .id(checkSequence.incrementAndGet())
                 .name("gateway-check")
-                .url("https://catfact.ninja.popa")
+                .url("https://catfact.ninja.test")
                 .method("GET")
                 .intervalSec(10)
                 .timeoutMs(5000)
