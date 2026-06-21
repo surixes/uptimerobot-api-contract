@@ -1,6 +1,6 @@
 spring:
   application:
-    name: audit-service
+    name: uptimerobot-incident-service
   rabbitmq:
     host: localhost
     port: 5672
@@ -14,4 +14,11 @@ spring:
           max-attempts: 3           # максимум 3 попытки
           multiplier: 2.0           # каждая следующая x2
 server:
-  port: 8081           # не конфликтует с demo-rest (8080)
+  port: 8081           # не конфликтует с uptimerobot-api-rest (8080)
+
+logging:
+  level:
+    root: INFO
+    edu.rutmiit: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"

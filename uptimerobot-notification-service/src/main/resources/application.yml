@@ -15,3 +15,10 @@ spring:
           multiplier: 2.0
 server:
   port: 8084
+
+logging:
+  level:
+    root: INFO
+    edu.rutmiit: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"

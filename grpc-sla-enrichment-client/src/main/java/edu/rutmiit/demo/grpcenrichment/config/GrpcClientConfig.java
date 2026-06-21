@@ -21,7 +21,7 @@ import jakarta.annotation.PreDestroy;
  * BlockingStub — синхронный клиентский стаб. Аналог RestTemplate для REST.
  * - Вызов метода блокирует поток до получения ответа
  * - Подходит для простых unary RPC
- * - Для async используется BookAnalyticsGrpc.newFutureStub() или newStub()
+ * - Для async используется SlaCalculatorGrpc.newFutureStub() или newStub()
  *
  * usePlaintext() — отключает TLS (В проде обязательно TLS с сертификатами).
  * Для лабы упростили...
@@ -46,7 +46,7 @@ public class GrpcClientConfig {
                 .usePlaintext()
                 .build();
 
-        log.info("gRPC SLA канал создан: {}:{}", grpcHost, grpcPort);
+        log.info("grpc channel opened: target={}:{}", grpcHost, grpcPort);
         return channel;
     }
 
@@ -58,7 +58,7 @@ public class GrpcClientConfig {
     @PreDestroy
     public void shutdown() {
         if (channel != null && !channel.isShutdown()) {
-            log.info("Закрытие gRPC SLA канала...");
+            log.info("grpc channel closing");
             channel.shutdown();
         }
     }

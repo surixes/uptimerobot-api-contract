@@ -7,7 +7,7 @@ package edu.rutmiit.demo.events;
  * Это позволяет инфраструктурному коду (логирование, дедупликация, маршрутизация)
  * работать с метаданными, не зная ничего о payload :)
  *
- * @param <T> тип полезной нагрузки (BookEvent.Created, AuthorEvent.Deleted и т.д.)
+ * @param <T> тип полезной нагрузки (CheckEvent.Created, IncidentEvent.Opened и т.д.)
  */
 public record EventEnvelope<T>(
         EventMetadata metadata,

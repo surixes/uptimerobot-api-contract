@@ -40,11 +40,11 @@ public class IncidentEventListener {
                             jsonMapper.treeToValue(payloadNode, CheckEvent.Executed.class);
                     incidentProcessor.handleExecuted(event);
                 }
-                default -> log.debug("Ignored event type: {}", metadata.eventType());
+                default -> log.debug("event ignored: eventType={}", metadata.eventType());
             }
 
         } catch (Exception e) {
-            log.error("Failed to process event: {}", e.getMessage(), e);
+            log.error("event processing failed: error={}", e.getMessage(), e);
             throw new RuntimeException("Could not process domain event", e);
         }
     }

@@ -1,5 +1,7 @@
 package edu.rutmiit.demo.uptimerobotrest.scheduler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckResponse;
@@ -13,6 +15,8 @@ import java.util.concurrent.ScheduledFuture;
 
 @Component
 public class CheckScheduler {
+
+    private static final Logger log = LoggerFactory.getLogger(CheckScheduler.class);
 
     private final InMemoryStorage storage;
     private final CheckService checkService;
@@ -30,8 +34,11 @@ public class CheckScheduler {
 
     @PostConstruct
     public void init() {
-        storage.checks.values().stream().filter(check -> Boolean.TRUE.equals(check.getEnabled()))
-                .forEach(this::scheduleCheck);
+        long enabledCount = storage.checks.values().stream()
+                .filter(check -> Boolean.TRUE.equals(check.getEnabled()))
+                .peek(this::scheduleCheck)
+                .count();
+        log.info("check scheduler initialized: enabledChecks={}", enabledCount);
     }
 
     public void scheduleCheck(CheckResponse check) {
@@ -55,12 +62,14 @@ public class CheckScheduler {
                 OffsetDateTime.now().plusSeconds(check.getIntervalSec()).toInstant());
 
         scheduledTasks.put(check.getId(), future);
+        log.debug("check scheduled: checkId={} intervalSec={}", check.getId(), check.getIntervalSec());
     }
 
     public void cancelCheck(Long checkId) {
         ScheduledFuture<?> future = scheduledTasks.remove(checkId);
         if (future != null) {
             future.cancel(false);
+            log.debug("check schedule cancelled: checkId={}", checkId);
         }
     }
 }

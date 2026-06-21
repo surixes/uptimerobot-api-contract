@@ -74,17 +74,19 @@ public class AlertRuleEventPublisher {
             );
 
             log.info(
-                    "Событие отправлено: {} [eventId={}]",
+                    "event published: routingKey={} eventId={} source={}",
                     routingKey,
-                    envelope.metadata().eventId()
+                    envelope.metadata().eventId(),
+                    SOURCE
             );
 
         } catch (Exception e) {
 
             log.error(
-                    "Не удалось отправить событие {}: {}",
+                    "event publish failed: routingKey={} error={}",
                     routingKey,
-                    e.getMessage()
+                    e.getMessage(),
+                    e
             );
         }
     }

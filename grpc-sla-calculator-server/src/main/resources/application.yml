@@ -3,7 +3,7 @@ spring:
     name: grpc-sla-calculator-server
 
 # HTTP-порт для Spring Boot (actuator, health)
-# Не конфликтует с demo-rest (8080), audit-service (8081), enrichment-client (8082)
+# Не конфликтует с uptimerobot-api-rest (8080), uptimerobot-incident-service (8081), enrichment-client (8082)
 server:
   port: 8083
 
@@ -20,3 +20,10 @@ management:
     web:
       exposure:
         include: health,info
+
+logging:
+  level:
+    root: INFO
+    edu.rutmiit: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"

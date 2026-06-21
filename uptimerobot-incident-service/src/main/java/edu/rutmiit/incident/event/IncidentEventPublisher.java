@@ -39,10 +39,10 @@ public class IncidentEventPublisher {
         try {
             EventEnvelope<IncidentEvent> envelope = EventEnvelope.wrap(event, SOURCE, routingKey);
             rabbitTemplate.convertAndSend(RoutingKeys.EXCHANGE, routingKey, envelope);
-            log.info("Incident event sent: {} [eventId={}]", routingKey,
-                    envelope.metadata().eventId());
+            log.info("event published: routingKey={} eventId={} source={}", routingKey,
+                    envelope.metadata().eventId(), SOURCE);
         } catch (Exception e) {
-            log.error("Failed to send incident event {}: {}", routingKey, e.getMessage(), e);
+            log.error("event publish failed: routingKey={} error={}", routingKey, e.getMessage(), e);
         }
     }
 }

@@ -21,7 +21,7 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         sessions.add(session);
-        log.info("WebSocket connected: {} (total: {})", session.getId(), sessions.size());
+        log.info("websocket connected: sessionId={} total={}", session.getId(), sessions.size());
         String welcome = "{\"type\":\"CONNECTED\",\"message\":\"Подключено к UptimeRobot Notification Service\",\"activeConnections\":"
                 + sessions.size() + "}";
         session.sendMessage(new TextMessage(welcome));
@@ -30,7 +30,7 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         sessions.remove(session);
-        log.info("WebSocket closed: {} (status: {}, total: {})", session.getId(), status, sessions.size());
+        log.info("websocket closed: sessionId={} status={} total={}", session.getId(), status, sessions.size());
     }
 
     @Override
@@ -43,7 +43,7 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
         sessions.remove(session);
-        log.warn("WebSocket transport error for {}: {}", session.getId(), exception.getMessage());
+        log.warn("websocket transport error: sessionId={} error={}", session.getId(), exception.getMessage());
     }
 
     public void broadcast(String json) {
@@ -62,7 +62,7 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
                 session.sendMessage(message);
             } catch (IOException e) {
                 sessions.remove(session);
-                log.warn("WebSocket send error for {}: {}", session.getId(), e.getMessage());
+                log.warn("websocket send failed: sessionId={} error={}", session.getId(), e.getMessage());
             }
         }
     }

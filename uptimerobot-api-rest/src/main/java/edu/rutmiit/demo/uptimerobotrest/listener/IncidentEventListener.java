@@ -49,10 +49,10 @@ public class IncidentEventListener {
                             objectMapper.treeToValue(payloadNode, IncidentEvent.Closed.class);
                     incidentService.markClosed(event.incidentId());
                 }
-                default -> log.debug("Ignored event type: {}", metadata.eventType());
+                default -> log.debug("event ignored: eventType={}", metadata.eventType());
             }
         } catch (Exception e) {
-            log.error("Failed to process incident event: {}", e.getMessage(), e);
+            log.error("incident event processing failed: error={}", e.getMessage(), e);
             throw new RuntimeException("Could not process incident event", e);
         }
     }

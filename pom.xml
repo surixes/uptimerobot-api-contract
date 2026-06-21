@@ -8,11 +8,11 @@
         # Собрать всё в правильном порядке
         .\mvnw install
 
-        # Запустить demo-rest - контракт соберётся автоматически
-        .\mvnw spring-boot:run -pl demo-rest -am
+        # Запустить REST API — контракт соберётся автоматически
+        .\mvnw spring-boot:run -pl uptimerobot-api-rest -am
 
         # Собрать только контракт (если менял только его)
-        .\mvnw install -pl books-api-contract
+        .\mvnw install -pl uptimerobot-api-contract
 
         mvn -f uptimerobot-notification-service/pom.xml spring-boot:run
         mvn -f uptimerobot-incident-service/pom.xml spring-boot:run

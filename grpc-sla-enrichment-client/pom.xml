@@ -46,7 +46,7 @@
             <version>1.0</version>
         </dependency>
 
-        <!-- Контракт доменных событий — BookEvent, EventEnvelope, RoutingKeys -->
+        <!-- Контракт доменных событий — CheckEvent, SlaEvent, EventEnvelope, RoutingKeys -->
         <dependency>
             <groupId>edu.rutmiit.demo</groupId>
             <artifactId>uptimerobot-events-contract</artifactId>

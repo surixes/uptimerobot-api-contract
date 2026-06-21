@@ -6,10 +6,10 @@
 
     <!--
         Контракт gRPC-сервиса — .proto файлы + сгенерированные Java-стабы.
-        Используется двумя сторонами и gRPC-сервером (grpc-analytics-server)
+        Используется двумя сторонами и gRPC-сервером (grpc-sla-calculator-server)
         и gRPC-клиентом (grpc-enrichment-client).
 
-        Аналогично books-api-contract для REST и books-events-contract для событий —
+        Аналогично uptimerobot-api-contract для REST и uptimerobot-events-contract для событий —
         контракт выделяется в отдельный модуль, чтобы обе стороны зависели
         от одного и того же кода.
     -->
@@ -109,7 +109,7 @@
                         <goals>
                             <!-- Генерация классов proto-сообщений (Request, Response) -->
                             <goal>compile</goal>
-                            <!-- Генерация gRPC-стабов (BookAnalyticsGrpc с BlockingStub и т.д.) -->
+                            <!-- Генерация gRPC-стабов (SlaCalculatorGrpc с BlockingStub и т.д.) -->
                             <goal>compile-custom</goal>
                         </goals>
                     </execution>

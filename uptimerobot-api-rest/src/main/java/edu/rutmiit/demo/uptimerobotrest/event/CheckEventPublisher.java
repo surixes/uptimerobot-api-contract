@@ -129,9 +129,9 @@ public class CheckEventPublisher {
         try {
             EventEnvelope<CheckEvent> envelope = EventEnvelope.wrap(event, SOURCE, routingKey);
             rabbitTemplate.convertAndSend(RoutingKeys.EXCHANGE, routingKey, envelope);
-            log.info("Событие отправлено: {} [eventId={}]", routingKey, envelope.metadata().eventId());
+            log.info("event published: routingKey={} eventId={} source={}", routingKey, envelope.metadata().eventId(), SOURCE);
         } catch (Exception e) {
-            log.error("Не удалось отправить событие {}: {}", routingKey, e.getMessage());
+            log.error("event publish failed: routingKey={} error={}", routingKey, e.getMessage(), e);
         }
     }
 }
