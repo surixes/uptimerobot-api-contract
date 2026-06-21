@@ -270,11 +270,6 @@ public class InMemoryStorage {
         alertRules.put(rule8.getId(), rule8);
         alertRules.put(rule9.getId(), rule9);
 
-
-        // The removed demo incident builders were not stored, but they advanced the sequence to 4.
-        // Keep the same next generated incident id to avoid changing API-visible ids.
-        incidentSequence.set(4);
-
         log.info("storage seeded: checks={} alertRules={} incidents={}",
                 checks.size(), alertRules.size(), incidents.size());
 
