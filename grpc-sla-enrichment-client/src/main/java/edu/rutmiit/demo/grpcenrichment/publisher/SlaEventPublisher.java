@@ -30,14 +30,15 @@ public class SlaEventPublisher {
                     RoutingKeys.SLA_CALCULATED,
                     envelope);
 
-            log.info("Событие отправлено: {} [checkId={}, uptime={}%, status={}, eventId={}]",
+            log.info("event published: routingKey={} checkId={} uptime={} status={} eventId={} source={}",
                     RoutingKeys.SLA_CALCULATED,
                     event.checkId(),
                     event.uptimePercent(),
                     event.availabilityStatus(),
-                    envelope.metadata().eventId());
+                    envelope.metadata().eventId(),
+                    SOURCE);
         } catch (Exception e) {
-            log.error("Не удалось отправить событие {}: {}",
+            log.error("event publish failed: routingKey={} error={}",
                     RoutingKeys.SLA_CALCULATED, e.getMessage(), e);
         }
     }

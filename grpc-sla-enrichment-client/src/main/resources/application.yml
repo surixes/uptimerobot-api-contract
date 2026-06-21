@@ -17,12 +17,12 @@ spring:
           multiplier: 2.0           # каждая следующая x2 (2с → 4с → 8с)
 
 # HTTP-порт для Spring Boot (actuator, health)
-# Не конфликтует с demo-rest (8080), audit-service (8081), analytics-server (8083)
+# Не конфликтует с uptimerobot-api-rest (8080), uptimerobot-incident-service (8081), grpc-sla-calculator-server (8083)
 server:
   port: 8082
 
 # gRPC-клиент
-# Адрес gRPC-сервера (grpc-analytics-server)
+# Адрес gRPC-сервера (grpc-sla-calculator-server)
 grpc:
   client:
     sla-calculator:
@@ -39,3 +39,10 @@ management:
     web:
       exposure:
         include: health,info
+
+logging:
+  level:
+    root: INFO
+    edu.rutmiit: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"

@@ -12,14 +12,14 @@ import edu.rutmiit.demo.grpc.sla.CheckExecution;
 import edu.rutmiit.demo.grpc.sla.SlaCalculatorGrpc;
 
 /**
- * Реализация gRPC-сервиса BookAnalytics.
+ * Реализация gRPC-сервиса SlaCalculator.
  *
- * Наследует сгенерированный базовый класс BookAnalyticsImplBase —
+ * Наследует сгенерированный базовый класс SlaCalculatorImplBase —
  * аналог того, как REST-контроллер реализует интерфейс контракта:
  *
- *   REST:    AuthorController implements AuthorApi
- *   GraphQL: BookDataFetcher с @DgsQuery
- *   gRPC:    BookAnalyticsServiceImpl extends BookAnalyticsGrpc.BookAnalyticsImplBase
+ *   REST:    CheckController implements CheckApi
+ *   GraphQL: CheckDataFetcher
+ *   gRPC:    SlaCalculatorServiceImpl extends SlaCalculatorGrpc.SlaCalculatorImplBase
  *
  * Ключевые отличия от REST/GraphQL:
  * - Бинарный протокол (protobuf) вместо JSON — компактнее и быстрее
@@ -76,7 +76,7 @@ public class SlaCalculatorServiceImpl extends SlaCalculatorGrpc.SlaCalculatorImp
                     .setWindowEndedAtEpochMs(request.getWindowEndedAtEpochMs())
                     .build();
 
-            log.info("SLA рассчитан: checkId={}, total={}, success={}, failure={}, uptime={}%, status={}",
+            log.info("sla calculated: checkId={} total={} success={} failure={} uptime={} status={}",
                     response.getCheckId(), total, successCount, failureCount,
                     response.getUptimePercent(), response.getAvailabilityStatus());
 

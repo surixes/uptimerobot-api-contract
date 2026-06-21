@@ -49,8 +49,8 @@ public class GrpcServerLifecycle implements SmartLifecycle {
                     .start();
 
             running = true;
-            log.info("gRPC SLA-сервер запущен на порту {}", grpcPort);
-            log.info("Сервис: SlaCalculator.CalculateSla()");
+            log.info("grpc server started: port={}", grpcPort);
+            log.info("grpc service registered: method=SlaCalculator.CalculateSla");
         } catch (IOException e) {
             throw new RuntimeException("Не удалось запустить gRPC SLA-сервер на порту " + grpcPort, e);
         }
@@ -59,10 +59,10 @@ public class GrpcServerLifecycle implements SmartLifecycle {
     @Override
     public void stop() {
         if (server != null) {
-            log.info("Остановка gRPC SLA-сервера...");
+            log.info("grpc server stopping");
             server.shutdown();
             running = false;
-            log.info("gRPC SLA-сервер остановлен");
+            log.info("grpc server stopped");
         }
     }
 

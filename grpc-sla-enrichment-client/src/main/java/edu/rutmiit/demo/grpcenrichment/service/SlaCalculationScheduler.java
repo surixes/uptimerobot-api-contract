@@ -39,17 +39,17 @@ public class SlaCalculationScheduler {
         List<WindowSnapshot> snapshots = aggregator.drainAll(windowEndedAt);
 
         if (snapshots.isEmpty()) {
-            log.debug("SLA окно пустое — нечего рассчитывать");
+            log.debug("sla calculation skipped: reason=empty-window");
             return;
         }
 
-        log.info("Запуск SLA расчёта: windows={}", snapshots.size());
+        log.info("sla calculation started: windows={}", snapshots.size());
 
         for (WindowSnapshot snapshot : snapshots) {
             try {
                 CalculateSlaRequest request = toGrpcRequest(snapshot);
 
-                log.info("Вызов gRPC: SlaCalculator.CalculateSla(checkId={}, samples={})",
+                log.info("grpc call started: method=SlaCalculator.CalculateSla checkId={} samples={}",
                         snapshot.checkId(), snapshot.samples().size());
 
                 CalculateSlaResponse response = slaCalculatorStub.calculateSla(request);
@@ -70,11 +70,11 @@ public class SlaCalculationScheduler {
 
                 publisher.publishCalculated(event);
             } catch (StatusRuntimeException e) {
-                log.error("gRPC ошибка при расчёте SLA для checkId={}: {} ({})",
-                        snapshot.checkId(), e.getStatus().getDescription(), e.getStatus().getCode());
+                log.error("sla grpc calculation failed: checkId={} code={} description={}",
+                        snapshot.checkId(), e.getStatus().getCode(), e.getStatus().getDescription());
                 requeueSamples(snapshot);
             } catch (Exception e) {
-                log.error("Ошибка расчёта SLA для checkId={}: {}",
+                log.error("sla calculation failed: checkId={} error={}",
                         snapshot.checkId(), e.getMessage(), e);
                 requeueSamples(snapshot);
             }

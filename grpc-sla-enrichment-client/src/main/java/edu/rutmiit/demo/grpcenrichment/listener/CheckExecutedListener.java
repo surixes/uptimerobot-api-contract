@@ -15,9 +15,9 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Слушатель событий book.created из RabbitMQ.
+ * Слушатель событий check.executed из RabbitMQ.
  *
- * Десериализация — ручная (как в audit-service), потому что EventEnvelope<T>
+ * Десериализация — ручная, потому что EventEnvelope<T>
  * является generic-типом, и Jackson не может определить конкретный подтип T.
  */
 @Component
@@ -54,11 +54,11 @@ public class CheckExecutedListener {
 
                         aggregator.add(sample);
 
-                        log.info("SLA sample принят: checkId={}, success={}, responseTime={}ms [eventId={}]",
+                        log.info("sla sample received: checkId={} success={} responseTimeMs={} eventId={}",
                                         sample.checkId(), sample.success(), sample.responseTimeMs(),
                                         metadata.eventId());
                 } catch (Exception e) {
-                        log.error("Ошибка обработки check.executed для SLA: {}", e.getMessage(), e);
+                        log.error("sla sample processing failed: error={}", e.getMessage(), e);
                         throw new RuntimeException("Не удалось обработать check.executed для SLA",
                                         e);
                 }

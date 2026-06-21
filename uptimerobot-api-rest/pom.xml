@@ -13,19 +13,6 @@
     <version>0.0.3-SNAPSHOT</version>
     <name>uptimerobot-api-rest</name>
     <description>uptimerobot-api-rest</description>
-    <url/>
-    <licenses>
-        <license/>
-    </licenses>
-    <developers>
-        <developer/>
-    </developers>
-    <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
-    </scm>
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>

@@ -107,7 +107,8 @@ public class AlertRuleService {
                                 .expectedStatusCode(request.expectedStatusCode())
                                 .expectedResponseContains(request.expectedResponseContains())
                                 .failureCount(request.failureCount()).message(request.message())
-                                .details(request.details()).updatedAt(now).build();
+                                .details(request.details()).createdAt(existing.getCreatedAt())
+                                .updatedAt(now).build();
 
                 storage.alertRules.put(id, updated);
                 eventPublisher.alertRuleUpdated(updated);
@@ -118,19 +119,30 @@ public class AlertRuleService {
                 AlertRuleResponse existing = findById(id);
                 OffsetDateTime now = OffsetDateTime.now();
 
+                CheckResponse check = request.checkId() != null ? getCheckOrThrow(request.checkId())
+                                : existing.getCheck();
+
                 AlertRuleResponse updated = AlertRuleResponse.builder().id(existing.getId())
-                                .check(existing.getCheck())
+                                .check(check)
                                 .alertName(request.alertName() != null ? request.alertName()
                                                 : existing.getAlertName())
+                                .ruleType(existing.getRuleType())
                                 .severity(request.severity() != null ? request.severity()
                                                 : existing.getSeverity())
+                                .enabled(existing.getEnabled())
+                                .thresholdMs(existing.getThresholdMs())
+                                .expectedStatusCode(existing.getExpectedStatusCode())
+                                .expectedResponseContains(existing.getExpectedResponseContains())
+                                .failureCount(existing.getFailureCount())
                                 .message(request.message() != null ? request.message()
                                                 : existing.getMessage())
                                 .details(request.details() != null ? request.details()
                                                 : existing.getDetails())
+                                .createdAt(existing.getCreatedAt())
                                 .updatedAt(now).build();
 
                 storage.alertRules.put(id, updated);
+                eventPublisher.alertRuleUpdated(updated);
                 return updated;
         }
 

@@ -41,7 +41,7 @@ public class EventNotificationListener {
             EventMetadata metadata = objectMapper.treeToValue(root.get("metadata"), EventMetadata.class);
 
             if (!processedEventIds.add(metadata.eventId())) {
-                log.warn("Duplicate notification skipped: eventId={}", metadata.eventId());
+                log.warn("notification skipped: reason=duplicate eventId={}", metadata.eventId());
                 return;
             }
 
@@ -64,10 +64,10 @@ public class EventNotificationListener {
             ));
 
             webSocketHandler.broadcast(notificationJson);
-            log.info("[NOTIFY] {} | {} (clients: {})",
-                    metadata.eventType(), description, webSocketHandler.getActiveConnectionCount());
+            log.info("notification sent: eventType={} eventId={} clients={}",
+                    metadata.eventType(), metadata.eventId(), webSocketHandler.getActiveConnectionCount());
         } catch (Exception e) {
-            log.error("Failed to process notification event: {}", e.getMessage(), e);
+            log.error("notification processing failed: error={}", e.getMessage(), e);
             throw new RuntimeException("Could not process notification event", e);
         }
     }

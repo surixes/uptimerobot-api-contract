@@ -5,13 +5,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * gRPC Enrichment Client — микросервис обогащения книг.
+ * gRPC Enrichment Client — микросервис расчёта SLA.
  *
- * Слушает событие book.created из RabbitMQ, вызывает gRPC-сервер
- * для аналитики и публикует book.enriched обратно в шину.
+ * Слушает событие check.executed из RabbitMQ, вызывает gRPC-сервер
+ * для расчёта SLA и публикует sla.calculated обратно в шину.
  *
  * Запуск:
- *   mvnw spring-boot:run -pl grpc-enrichment-client
+ *   mvnw spring-boot:run -pl grpc-sla-enrichment-client
  */
 @EnableScheduling
 @SpringBootApplication

@@ -21,7 +21,6 @@ public class CheckExecutor {
     private static final Logger log = LoggerFactory.getLogger(CheckExecutor.class);
 
     private static final int DEFAULT_TIMEOUT_MS = 3000;
-    private static final int RESPONSE_PREVIEW_LENGTH = 120;
 
     private final HttpClient httpClient;
 
@@ -41,8 +40,6 @@ public class CheckExecutor {
         try {
             HttpRequest request = buildRequest(check);
 
-            logRequest(check, executionId);
-
             HttpResponse<String> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -50,8 +47,6 @@ public class CheckExecutor {
 
             Integer responseCode = response.statusCode();
             String responseBody = response.body();
-
-            logResponse(check, executionId, responseCode, responseTimeMs, responseBody);
 
             boolean statusOk = check.getExpectedStatusCode() == null
                     || Objects.equals(responseCode, check.getExpectedStatusCode());
@@ -63,6 +58,8 @@ public class CheckExecutor {
             boolean success = statusOk && bodyOk;
             String failureReason = success ? null : buildFailureReason(statusOk, bodyOk);
 
+            logExecution(check, executionId, success, responseCode, responseTimeMs, failureReason);
+
             return new CheckExecutionSnapshot(executionId, executedAt, success, responseCode,
                     responseTimeMs, responseBody, failureReason);
 
@@ -70,19 +67,18 @@ public class CheckExecutor {
             Thread.currentThread().interrupt();
 
             int responseTimeMs = (int) Duration.ofNanos(System.nanoTime() - startNanos).toMillis();
-
-            logError(check, executionId, e);
+            logExecutionFailure(check, executionId, responseTimeMs, "INTERRUPTED");
 
             return new CheckExecutionSnapshot(executionId, executedAt, false, null, responseTimeMs,
                     null, "INTERRUPTED");
 
         } catch (Exception e) {
             int responseTimeMs = (int) Duration.ofNanos(System.nanoTime() - startNanos).toMillis();
-
-            logError(check, executionId, e);
+            String failureReason = rootMessage(e);
+            logExecutionFailure(check, executionId, responseTimeMs, failureReason);
 
             return new CheckExecutionSnapshot(executionId, executedAt, false, null, responseTimeMs,
-                    null, rootMessage(e));
+                    null, failureReason);
         }
     }
 
@@ -104,50 +100,31 @@ public class CheckExecutor {
         };
     }
 
-    private void logRequest(CheckResponse check, String executionId) {
+    private void logExecution(CheckResponse check, String executionId, boolean success,
+            Integer responseCode, int responseTimeMs, String failureReason) {
         if (!loggingEnabled) {
             return;
         }
 
-        log.info("[CHECK_REQUEST] id={} method={} url={}", executionId, check.getMethod(),
-                check.getUrl());
+        if (success) {
+            log.info("check executed: checkId={} name=\"{}\" success=true code={} timeMs={} executionId={}",
+                    check.getId(), check.getName(), responseCode, responseTimeMs, executionId);
+            return;
+        }
+
+        log.warn("check executed: checkId={} name=\"{}\" success=false code={} timeMs={} reason={} executionId={}",
+                check.getId(), check.getName(), responseCode, responseTimeMs, failureReason,
+                executionId);
     }
 
-    private void logResponse(CheckResponse check, String executionId, Integer responseCode,
-            int responseTimeMs, String responseBody) {
-
+    private void logExecutionFailure(CheckResponse check, String executionId, int responseTimeMs,
+            String failureReason) {
         if (!loggingEnabled) {
             return;
         }
 
-        String preview = buildResponsePreview(responseBody);
-
-        log.info("[CHECK_RESPONSE] id={} method={} url={} code={} timeMs={} body=\"{}\"",
-                executionId, check.getMethod(), check.getUrl(), responseCode, responseTimeMs,
-                preview);
-    }
-
-    private void logError(CheckResponse check, String executionId, Exception e) {
-        if (!loggingEnabled) {
-            return;
-        }
-
-        log.error("[CHECK_ERROR] id={} method={} url={} error={}", executionId, check.getMethod(),
-                check.getUrl(), rootMessage(e));
-    }
-
-    private String buildResponsePreview(String responseBody) {
-        if (responseBody == null || responseBody.isBlank()) {
-            return "<empty>";
-        }
-
-        String normalized = responseBody.replaceAll("\\s+", " ").trim();
-
-        if (normalized.length() <= RESPONSE_PREVIEW_LENGTH) {
-            return normalized;
-        }
-
-        return normalized.substring(0, RESPONSE_PREVIEW_LENGTH) + "...";
+        log.warn("check execution failed: checkId={} name=\"{}\" timeMs={} reason={} executionId={}",
+                check.getId(), check.getName(), responseTimeMs, failureReason, executionId);
     }
 
     private String buildFailureReason(boolean statusOk, boolean bodyOk) {

@@ -25,7 +25,7 @@ public record EventMetadata(
         // Источник события — имя сервиса, который его породил.
         String source,
 
-        // Тип события: "book.created", "author.deleted" и т.д.
+        // Тип события: "check.created", "incident.opened" и т.д.
         // Совпадает с routing key в RabbitMQ — удобно для логирования.
         String eventType
 ) {

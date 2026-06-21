@@ -14,16 +14,16 @@ import tools.jackson.databind.json.JsonMapper;
 /**
  * Конфигурация RabbitMQ для enrichment-клиента.
  *
- * Этот сервис одновременно и consumer (слушает book.created),
- * и publisher (публикует book.enriched). Поэтому конфигурация включает:
+ * Этот сервис одновременно и consumer (слушает check.executed),
+ * и publisher (публикует sla.calculated). Поэтому конфигурация включает:
  * - Exchange (общий для всех сервисов)
- * - Очередь для приёма book.created
+ * - Очередь для приёма check.executed
  * - DLQ для необработанных сообщений
- * - RabbitTemplate для публикации book.enriched
+ * - RabbitTemplate для публикации sla.calculated
  *
  * Каждый consumer определяет свою очередь и привязку.
- * Enrichment-клиент слушает только book.created (не все события),
- * поэтому binding key = "book.created", а не "#".
+ * Enrichment-клиент слушает только check.executed,
+ * поэтому binding key = RoutingKeys.CHECK_EXECUTED, а не "#".
  */
 @Configuration
 public class RabbitMQConfig {

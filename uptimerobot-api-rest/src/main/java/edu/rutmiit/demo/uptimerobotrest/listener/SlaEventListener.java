@@ -36,7 +36,7 @@ public class SlaEventListener {
                             jsonMapper.treeToValue(payloadNode, SlaEvent.Calculated.class);
 
                     log.info(
-                            "[SLA] checkId={}, checkName={}, uptime={}%, status={}, total={}, success={}, failure={}, avg={}ms, max={}ms, window={}..{}",
+                            "sla event received: checkId={} checkName={} uptime={} status={} total={} success={} failure={} avgMs={} maxMs={} windowStart={} windowEnd={}",
                             event.checkId(),
                             event.checkName(),
                             event.uptimePercent(),
@@ -50,10 +50,10 @@ public class SlaEventListener {
                             event.windowEndedAt()
                     );
                 }
-                default -> log.debug("Ignored SLA event type: {}", metadata.eventType());
+                default -> log.debug("sla event ignored: eventType={}", metadata.eventType());
             }
         } catch (Exception e) {
-            log.error("Failed to process SLA event: {}", e.getMessage(), e);
+            log.error("sla event processing failed: error={}", e.getMessage(), e);
             throw new RuntimeException("Could not process SLA event", e);
         }
     }

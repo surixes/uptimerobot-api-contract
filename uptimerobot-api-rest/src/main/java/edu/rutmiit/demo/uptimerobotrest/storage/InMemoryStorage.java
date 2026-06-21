@@ -3,10 +3,11 @@ package edu.rutmiit.demo.uptimerobotrest.storage;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertRuleResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertRuleTypeEnum;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.IncidentSeverityEnum;
-import edu.rutmiit.demo.uptimerobotapicontract.dto.IncidentStatusEnum;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.IncidentResponse;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -16,6 +17,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class InMemoryStorage {
+
+    private static final Logger log = LoggerFactory.getLogger(InMemoryStorage.class);
 
     public final Map<Long, CheckResponse> checks = new ConcurrentHashMap<>();
     public final Map<Long, AlertRuleResponse> alertRules = new ConcurrentHashMap<>();
@@ -267,66 +270,8 @@ public class InMemoryStorage {
         alertRules.put(rule8.getId(), rule8);
         alertRules.put(rule9.getId(), rule9);
 
-        IncidentResponse incident1 = IncidentResponse.builder()
-                .id(incidentSequence.incrementAndGet())
-                .check(check2)
-                .alertRule(rule2)
-                .status(IncidentStatusEnum.OPEN)
-                .severity(IncidentSeverityEnum.WARNING)
-                .message("Catfact API is unavailable")
-                .details("Seed demo incident with OPEN status")
-                .openedAt(now.minusMinutes(40))
-                .updatedAt(now.minusMinutes(40))
-                .build();
+        log.info("storage seeded: checks={} alertRules={} incidents={}",
+                checks.size(), alertRules.size(), incidents.size());
 
-        IncidentResponse incident2 = IncidentResponse.builder()
-                .id(incidentSequence.incrementAndGet())
-                .check(check3)
-                .alertRule(rule4)
-                .status(IncidentStatusEnum.ACKNOWLEDGED)
-                .severity(IncidentSeverityEnum.WARNING)
-                .message("Dog API had intermittent failures")
-                .details("Seed demo incident with ACKNOWLEDGED status")
-                .openedAt(now.minusHours(2))
-                .updatedAt(now.minusHours(1))
-                .acknowledgedAt(now.minusHours(1))
-                .acknowledgedBy("admin")
-                .build();
-
-        IncidentResponse incident3 = IncidentResponse.builder()
-                .id(incidentSequence.incrementAndGet())
-                .check(check4)
-                .alertRule(rule6)
-                .status(IncidentStatusEnum.RESOLVED)
-                .severity(IncidentSeverityEnum.CRITICAL)
-                .message("Httpbin status issue resolved")
-                .details("Seed demo incident with RESOLVED status")
-                .openedAt(now.minusHours(6))
-                .updatedAt(now.minusHours(2))
-                .acknowledgedAt(now.minusHours(5))
-                .acknowledgedBy("devops")
-                .resolvedAt(now.minusHours(2))
-                .build();
-
-        IncidentResponse incident4 = IncidentResponse.builder()
-                .id(incidentSequence.incrementAndGet())
-                .check(check5)
-                .alertRule(rule7)
-                .status(IncidentStatusEnum.CLOSED)
-                .severity(IncidentSeverityEnum.WARNING)
-                .message("JsonPlaceholder temporary issue")
-                .details("Seed demo incident with CLOSED status")
-                .openedAt(now.minusHours(12))
-                .updatedAt(now.minusHours(9))
-                .acknowledgedAt(now.minusHours(11))
-                .acknowledgedBy("system")
-                .resolvedAt(now.minusHours(10))
-                .closedAt(now.minusHours(9))
-                .build();
-
-        // incidents.put(incident1.getId(), incident1);
-        // incidents.put(incident2.getId(), incident2);
-        // incidents.put(incident3.getId(), incident3);
-        // incidents.put(incident4.getId(), incident4);
     }
 }
