@@ -139,6 +139,8 @@ public interface CheckApi {
                         description = "Чек создан. Location header содержит URI нового ресурса.")
         @ApiResponse(responseCode = "400", description = "Ошибка валидации",
                         content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        @ApiResponse(responseCode = "409", description = "Чек с таким именем уже существует",
+                        content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
         @ResponseStatus(HttpStatus.CREATED)
         ResponseEntity<EntityModel<CheckResponse>> createCheck(

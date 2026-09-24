@@ -22,10 +22,13 @@ public class IncidentService {
 
     private final InMemoryStorage storage;
     private final AlertRuleService alertRuleService;
+    private final CheckService checkService;
 
-    public IncidentService(InMemoryStorage storage, AlertRuleService alertRuleService) {
+    public IncidentService(InMemoryStorage storage, AlertRuleService alertRuleService,
+            CheckService checkService) {
         this.storage = storage;
         this.alertRuleService = alertRuleService;
+        this.checkService = checkService;
     }
 
     public PagedResponse<IncidentResponse> findByCheckId(Long checkId, int page, int size,
@@ -213,7 +216,7 @@ public class IncidentService {
         long id = storage.incidentSequence.incrementAndGet();
         OffsetDateTime now = OffsetDateTime.now();
 
-        CheckResponse check = request.checkId() != null ? storage.checks.get(request.checkId()) : null;
+        CheckResponse check = request.checkId() != null ? checkService.findById(request.checkId()) : null;
         AlertRuleResponse alertRule = request.alertRuleId() != null ? storage.alertRules.get(request.alertRuleId()) : null;
 
         if (check == null) {
@@ -247,7 +250,7 @@ public class IncidentService {
         IncidentResponse existing = findById(id);
         OffsetDateTime now = OffsetDateTime.now();
 
-        CheckResponse check = request.checkId() != null ? storage.checks.get(request.checkId())
+        CheckResponse check = request.checkId() != null ? checkService.findById(request.checkId())
                 : existing.getCheck();
         AlertRuleResponse alertRule =
                 request.alertRuleId() != null ? storage.alertRules.get(request.alertRuleId())

@@ -20,11 +20,9 @@ public class InMemoryStorage {
 
     private static final Logger log = LoggerFactory.getLogger(InMemoryStorage.class);
 
-    public final Map<Long, CheckResponse> checks = new ConcurrentHashMap<>();
     public final Map<Long, AlertRuleResponse> alertRules = new ConcurrentHashMap<>();
     public final Map<Long, IncidentResponse> incidents = new ConcurrentHashMap<>();
 
-    public final AtomicLong checkSequence = new AtomicLong(0);
     public final AtomicLong alertRuleSequence = new AtomicLong(0);
     public final AtomicLong incidentSequence = new AtomicLong(0);
 
@@ -34,7 +32,7 @@ public class InMemoryStorage {
         OffsetDateTime now = OffsetDateTime.now();
 
         CheckResponse check1 = CheckResponse.builder()
-                .id(checkSequence.incrementAndGet())
+                .id(1L)
                 .name("gateway-check")
                 .url("https://catfact.ninja.test")
                 .method("GET")
@@ -49,7 +47,7 @@ public class InMemoryStorage {
                 .build();
 
         CheckResponse check2 = CheckResponse.builder()
-                .id(checkSequence.incrementAndGet())
+                .id(2L)
                 .name("catfact-api-check")
                 .url("https://catfact.ninja/fact")
                 .method("GET")
@@ -64,7 +62,7 @@ public class InMemoryStorage {
                 .build();
 
         CheckResponse check3 = CheckResponse.builder()
-                .id(checkSequence.incrementAndGet())
+                .id(3L)
                 .name("dog-api-check")
                 .url("https://dog.ceo/api/breeds/image/random")
                 .method("GET")
@@ -79,7 +77,7 @@ public class InMemoryStorage {
                 .build();
 
         CheckResponse check4 = CheckResponse.builder()
-                .id(checkSequence.incrementAndGet())
+                .id(4L)
                 .name("httpbin-status-check")
                 .url("https://httpbin.org/status/200")
                 .method("GET")
@@ -94,7 +92,7 @@ public class InMemoryStorage {
                 .build();
 
         CheckResponse check5 = CheckResponse.builder()
-                .id(checkSequence.incrementAndGet())
+                .id(5L)
                 .name("jsonplaceholder-check")
                 .url("https://jsonplaceholder.typicode.com/posts/1")
                 .method("GET")
@@ -109,7 +107,7 @@ public class InMemoryStorage {
                 .build();
 
         CheckResponse check6 = CheckResponse.builder()
-                .id(checkSequence.incrementAndGet())
+                .id(6L)
                 .name("disabled-demo-check")
                 .url("https://example.com")
                 .method("GET")
@@ -123,12 +121,6 @@ public class InMemoryStorage {
                 .lastResponseTimeMs(90)
                 .build();
 
-        checks.put(check1.getId(), check1);
-        checks.put(check2.getId(), check2);
-        checks.put(check3.getId(), check3);
-        checks.put(check4.getId(), check4);
-        checks.put(check5.getId(), check5);
-        checks.put(check6.getId(), check6);
 
         AlertRuleResponse rule1 = AlertRuleResponse.builder()
                 .id(alertRuleSequence.incrementAndGet())
@@ -270,8 +262,8 @@ public class InMemoryStorage {
         alertRules.put(rule8.getId(), rule8);
         alertRules.put(rule9.getId(), rule9);
 
-        log.info("storage seeded: checks={} alertRules={} incidents={}",
-                checks.size(), alertRules.size(), incidents.size());
+        log.info("storage seeded: alertRules={} incidents={}",
+                alertRules.size(), incidents.size());
 
     }
 }

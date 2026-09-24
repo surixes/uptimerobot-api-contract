@@ -3,8 +3,9 @@ package edu.rutmiit.demo.uptimerobotrest.service;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import edu.rutmiit.demo.dto.CheckExecutionSnapshot;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.AlertRuleResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckRequest;
@@ -12,51 +13,52 @@ import edu.rutmiit.demo.uptimerobotapicontract.dto.CheckResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.IncidentResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.PagedResponse;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.PatchCheckRequest;
+import edu.rutmiit.demo.uptimerobotapicontract.exception.CheckNameAlreadyExistsException;
 import edu.rutmiit.demo.uptimerobotapicontract.exception.ResourceNotFoundException;
 import edu.rutmiit.demo.uptimerobotrest.event.CheckEventPublisher;
+import edu.rutmiit.demo.uptimerobotrest.persistence.CheckEntity;
+import edu.rutmiit.demo.uptimerobotrest.persistence.CheckRepository;
 import edu.rutmiit.demo.uptimerobotrest.storage.InMemoryStorage;
 
 @Service
 public class CheckService {
 
+        private final CheckRepository checkRepository;
         private final InMemoryStorage storage;
         private final CheckEventPublisher eventPublisher;
         private final CheckExecutor executor;
-        private final AlertRuleService alertRuleService;
-        private final IncidentService incidentService;
 
-        public CheckService(InMemoryStorage storage, CheckEventPublisher eventPublisher, CheckExecutor executor, 
-                        AlertRuleService alertRuleService, IncidentService incidentService) {
+        public CheckService(CheckRepository checkRepository, InMemoryStorage storage,
+                        CheckEventPublisher eventPublisher, CheckExecutor executor) {
+                this.checkRepository = checkRepository;
                 this.storage = storage;
                 this.eventPublisher = eventPublisher;
                 this.executor = executor;
-                this.alertRuleService = alertRuleService;
-                this.incidentService = incidentService;
         }
 
+        @Transactional(readOnly = true)
         public CheckResponse findByName(String name) {
-                return storage.checks.values().stream().filter(c -> c.getName().equals(name))
-                                .findFirst()
+                return checkRepository.findByName(name)
+                                .map(this::toResponse)
                                 .orElseThrow(() -> new ResourceNotFoundException("check", name));
         }
 
+        @Transactional(readOnly = true)
         public PagedResponse<CheckResponse> findAll(Long checkId, String name, String url,
                         String method, Boolean enabled, int page, int size) {
 
                 int effectivePage = Math.max(page, 0);
                 int effectiveSize = Math.max(size, 1);
 
-                List<CheckResponse> all = storage.checks.values().stream()
+                List<CheckResponse> all = checkRepository.findAll().stream()
+                                .map(this::toResponse)
                                 .filter(c -> checkId == null || checkId.equals(c.getId()))
                                 .filter(c -> name == null || name.isBlank()
-                                                || (c.getName() != null && c.getName().toLowerCase()
-                                                                .contains(name.toLowerCase())))
+                                                || c.getName().toLowerCase().contains(name.toLowerCase()))
                                 .filter(c -> url == null || url.isBlank()
-                                                || (c.getUrl() != null && c.getUrl().toLowerCase()
-                                                                .contains(url.toLowerCase())))
+                                                || c.getUrl().toLowerCase().contains(url.toLowerCase()))
                                 .filter(c -> method == null || method.isBlank()
-                                                || (c.getMethod() != null && c.getMethod()
-                                                                .equalsIgnoreCase(method)))
+                                                || c.getMethod().equalsIgnoreCase(method))
                                 .filter(c -> enabled == null || enabled.equals(c.getEnabled()))
                                 .sorted(Comparator.comparingLong(CheckResponse::getId)).toList();
 
@@ -73,9 +75,16 @@ public class CheckService {
                                 totalPages, effectivePage >= Math.max(totalPages - 1, 0));
         }
 
+        @Transactional(readOnly = true)
         public CheckResponse findById(Long checkId) {
-                return Optional.ofNullable(storage.checks.get(checkId))
-                                .orElseThrow(() -> new ResourceNotFoundException("Check", checkId));
+                return toResponse(findEntityById(checkId));
+        }
+
+        @Transactional(readOnly = true)
+        public List<CheckResponse> findEnabled() {
+                return checkRepository.findAllByEnabledTrueOrderByIdAsc().stream()
+                                .map(this::toResponse)
+                                .toList();
         }
 
         public PagedResponse<AlertRuleResponse> findAlertRulesByCheckId(Long checkId, int page, int size,
@@ -141,103 +150,137 @@ public class CheckService {
                                 page >= totalPages - 1);
         }
 
+        @Transactional
         public CheckResponse create(CheckRequest request) {
-                long id = storage.checkSequence.incrementAndGet();
+                ensureNameAvailable(request.name(), null);
                 OffsetDateTime now = OffsetDateTime.now();
 
-                CheckResponse check = CheckResponse.builder().id(id).name(request.name()).url(request.url())
-                                .method(request.method()).intervalSec(request.intervalSec())
-                                .timeoutMs(request.timeoutMs()).enabled(request.enabled())
-                                .expectedStatusCode(request.expectedStatusCode())
-                                .expectedResponseContains(request.expectedResponseContains())
-                                .createdAt(now).updatedAt(now).lastResponseTimeMs(0).build();
+                CheckEntity entity = new CheckEntity(UUID.randomUUID(), request.name(), request.url(),
+                                request.method(), request.intervalSec(), request.timeoutMs(), request.enabled(),
+                                request.expectedStatusCode(), request.expectedResponseContains(),
+                                now, now, 0);
 
-                storage.checks.put(id, check);
+                CheckResponse check = toResponse(checkRepository.save(entity));
                 eventPublisher.publishCreated(check);
                 return check;
         }
 
+        @Transactional
         public CheckResponse update(Long id, CheckRequest request) {
-                CheckResponse existing = findById(id);
-                OffsetDateTime now = OffsetDateTime.now();
+                CheckEntity entity = findEntityById(id);
+                ensureNameAvailable(request.name(), id);
 
-                CheckResponse updated = CheckResponse.builder().id(existing.getId())
-                                .name(request.name()).url(request.url()).method(request.method())
-                                .intervalSec(request.intervalSec()).timeoutMs(request.timeoutMs())
-                                .enabled(request.enabled())
-                                .expectedStatusCode(request.expectedStatusCode())
-                                .expectedResponseContains(request.expectedResponseContains())
-                                .createdAt(existing.getCreatedAt()).updatedAt(now)
-                                .lastResponseTimeMs(existing.getLastResponseTimeMs()).build();
+                entity.setName(request.name());
+                entity.setUrl(request.url());
+                entity.setMethod(request.method());
+                entity.setIntervalSec(request.intervalSec());
+                entity.setTimeoutMs(request.timeoutMs());
+                entity.setEnabled(request.enabled());
+                entity.setExpectedStatusCode(request.expectedStatusCode());
+                entity.setExpectedResponseContains(request.expectedResponseContains());
+                entity.setUpdatedAt(OffsetDateTime.now());
 
-                storage.checks.put(id, updated);
+                CheckResponse updated = toResponse(entity);
                 eventPublisher.publishUpdate(updated);
                 return updated;
         }
 
+        @Transactional
         public CheckResponse patchCheck(Long id, PatchCheckRequest request) {
-                CheckResponse existing = findById(id);
-                OffsetDateTime now = OffsetDateTime.now();
+                CheckEntity entity = findEntityById(id);
 
-                CheckResponse updated = CheckResponse.builder().id(existing.getId())
-                                .name(request.name() != null ? request.name() : existing.getName())
-                                .url(request.url() != null ? request.url() : existing.getUrl())
-                                .method(request.method() != null ? request.method()
-                                                : existing.getMethod())
-                                .intervalSec(request.intervalSec() != null ? request.intervalSec()
-                                                : existing.getIntervalSec())
-                                .timeoutMs(request.timeoutMs() != null ? request.timeoutMs()
-                                                : existing.getTimeoutMs())
-                                .enabled(request.enabled() != null ? request.enabled()
-                                                : existing.getEnabled())
-                                .expectedStatusCode(request.expectedStatusCode() != null
-                                                ? request.expectedStatusCode()
-                                                : existing.getExpectedStatusCode())
-                                .expectedResponseContains(request.expectedResponseContains() != null
-                                                ? request.expectedResponseContains()
-                                                : existing.getExpectedResponseContains())
-                                .createdAt(existing.getCreatedAt()).updatedAt(now)
-                                .lastResponseTimeMs(existing.getLastResponseTimeMs()).build();
+                if (request.name() != null) {
+                        ensureNameAvailable(request.name(), id);
+                        entity.setName(request.name());
+                }
+                if (request.url() != null) {
+                        entity.setUrl(request.url());
+                }
+                if (request.method() != null) {
+                        entity.setMethod(request.method());
+                }
+                if (request.intervalSec() != null) {
+                        entity.setIntervalSec(request.intervalSec());
+                }
+                if (request.timeoutMs() != null) {
+                        entity.setTimeoutMs(request.timeoutMs());
+                }
+                if (request.enabled() != null) {
+                        entity.setEnabled(request.enabled());
+                }
+                if (request.expectedStatusCode() != null) {
+                        entity.setExpectedStatusCode(request.expectedStatusCode());
+                }
+                if (request.expectedResponseContains() != null) {
+                        entity.setExpectedResponseContains(request.expectedResponseContains());
+                }
+                entity.setUpdatedAt(OffsetDateTime.now());
 
-                storage.checks.put(id, updated);
+                CheckResponse updated = toResponse(entity);
                 eventPublisher.publishUpdate(updated);
                 return updated;
         }
 
+        @Transactional
         public void delete(Long id) {
-                CheckResponse existing = findById(id);
+                CheckEntity entity = findEntityById(id);
+                CheckResponse existing = toResponse(entity);
 
                 int deletedAlertsCount = (int) storage.alertRules.values().stream()
                                 .filter(a -> a.getCheck() != null && a.getCheck().getId() != null
                                                 && a.getCheck().getId().equals(id))
                                 .count();
 
-                storage.checks.remove(id);
+                checkRepository.delete(entity);
                 storage.alertRules.values().removeIf(a -> a.getCheck() != null
                                 && a.getCheck().getId() != null && a.getCheck().getId().equals(id));
 
                 eventPublisher.publishDeleted(existing, deletedAlertsCount);
         }
 
+        @Transactional
         public CheckResponse runCheckNow(Long id) {
-                CheckResponse existing = findById(id);
-                OffsetDateTime now = OffsetDateTime.now();
+                CheckEntity entity = findEntityById(id);
+                CheckResponse existing = toResponse(entity);
 
                 CheckExecutionSnapshot execution = executor.execute(existing);
-                List<AlertRuleResponse> alertRules = alertRuleService.getByCheckId(id);
-                List<IncidentResponse> incidents = incidentService.getByCheckId(id);
+                List<AlertRuleResponse> alertRules = storage.alertRules.values().stream()
+                                .filter(r -> r.getCheck() != null && id.equals(r.getCheck().getId()))
+                                .sorted(Comparator.comparingLong(AlertRuleResponse::getId)).toList();
+                List<IncidentResponse> incidents = storage.incidents.values().stream()
+                                .filter(r -> r.getCheck() != null && id.equals(r.getCheck().getId()))
+                                .sorted(Comparator.comparingLong(IncidentResponse::getId)).toList();
 
-                CheckResponse check = CheckResponse.builder().id(existing.getId())
-                                .name(existing.getName()).url(existing.getUrl()).method(existing.getMethod())
-                                .intervalSec(existing.getIntervalSec())
-                                .timeoutMs(existing.getTimeoutMs()).enabled(existing.getEnabled())
-                                .expectedStatusCode(existing.getExpectedStatusCode())
-                                .expectedResponseContains(existing.getExpectedResponseContains())
-                                .createdAt(existing.getCreatedAt()).updatedAt(now)
-                                .lastResponseTimeMs(execution.responseTimeMs()).build();
+                entity.setUpdatedAt(OffsetDateTime.now());
+                entity.setLastResponseTimeMs(execution.responseTimeMs());
 
-                storage.checks.put(id, check);
+                CheckResponse check = toResponse(entity);
                 eventPublisher.publishExecuted(check, execution, alertRules, incidents);
                 return check;
+        }
+
+        private CheckEntity findEntityById(Long id) {
+                return checkRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Check", id));
+        }
+
+        private void ensureNameAvailable(String name, Long currentId) {
+                boolean exists = currentId == null
+                                ? checkRepository.existsByName(name)
+                                : checkRepository.existsByNameAndIdNot(name, currentId);
+                if (exists) {
+                        throw new CheckNameAlreadyExistsException(name);
+                }
+        }
+
+        private CheckResponse toResponse(CheckEntity entity) {
+                return CheckResponse.builder().id(entity.getId()).name(entity.getName())
+                                .url(entity.getUrl()).method(entity.getMethod())
+                                .intervalSec(entity.getIntervalSec()).timeoutMs(entity.getTimeoutMs())
+                                .enabled(entity.getEnabled())
+                                .expectedStatusCode(entity.getExpectedStatusCode())
+                                .expectedResponseContains(entity.getExpectedResponseContains())
+                                .createdAt(entity.getCreatedAt()).updatedAt(entity.getUpdatedAt())
+                                .lastResponseTimeMs(entity.getLastResponseTimeMs()).build();
         }
 }

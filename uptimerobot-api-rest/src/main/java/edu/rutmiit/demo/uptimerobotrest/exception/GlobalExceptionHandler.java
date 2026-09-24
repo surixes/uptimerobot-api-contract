@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import edu.rutmiit.demo.uptimerobotapicontract.dto.ErrorResponse;
+import edu.rutmiit.demo.uptimerobotapicontract.exception.CheckNameAlreadyExistsException;
 import edu.rutmiit.demo.uptimerobotapicontract.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -30,6 +31,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(),
                         BASE_PROBLEM_URI + "resource-not-found", "Ресурс не найден",
+                        ex.getMessage(), req.getRequestURI(), Instant.now(), null));
+    }
+
+    @ExceptionHandler(CheckNameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleCheckNameConflict(CheckNameAlreadyExistsException ex,
+            HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(HttpStatus.CONFLICT.value(),
+                        BASE_PROBLEM_URI + "check-name-conflict", "Конфликт имени проверки",
                         ex.getMessage(), req.getRequestURI(), Instant.now(), null));
     }
 

@@ -21,10 +21,13 @@ public class AlertRuleService {
 
         private final InMemoryStorage storage;
         private final AlertRuleEventPublisher eventPublisher;
+        private final CheckService checkService;
 
-        public AlertRuleService(InMemoryStorage storage, AlertRuleEventPublisher eventPublisher) {
+        public AlertRuleService(InMemoryStorage storage, AlertRuleEventPublisher eventPublisher,
+                        CheckService checkService) {
                 this.storage = storage;
                 this.eventPublisher = eventPublisher;
+                this.checkService = checkService;
         }
 
         private CheckResponse getCheckOrThrow(Long checkId) {
@@ -32,8 +35,7 @@ public class AlertRuleService {
                         throw new IllegalArgumentException("checkId must not be null");
                 }
 
-                return Optional.ofNullable(storage.checks.get(checkId))
-                                .orElseThrow(() -> new ResourceNotFoundException("Check", checkId));
+                return checkService.findById(checkId);
         }
 
         public PagedResponse<AlertRuleResponse> findAll(Long alertRuleId, Long checkId,

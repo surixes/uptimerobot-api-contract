@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: uptimerobot
+      POSTGRES_USER: uptimerobot
+      POSTGRES_PASSWORD: uptimerobot
+    ports:
+      - "5432:5432"
+    volumes:
+      - uptimerobot-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  uptimerobot-postgres-data:
