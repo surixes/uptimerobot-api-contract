@@ -17,7 +17,6 @@ CREATE TABLE checks (
     CONSTRAINT uk_checks_name UNIQUE (name)
 );
 
--- These three records replace the checks that were previously seeded in InMemoryStorage.
 INSERT INTO checks (
     id, uuid, name, url, method, interval_sec, timeout_ms, enabled,
     expected_status_code, expected_response_contains, created_at, updated_at,
