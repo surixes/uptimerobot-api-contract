@@ -1,0 +1,167 @@
+{
+    "realm": "uptimerobot",
+    "enabled": true,
+    "roles": {
+        "client": {
+            "uptimerobot-api": [
+                {
+                    "name": "REPORT_READ"
+                },
+                {
+                    "name": "REPORT_OBSERVE"
+                }
+            ]
+        }
+    },
+    "clients": [
+        {
+            "clientId": "uptimerobot-api",
+            "enabled": true,
+            "protocol": "openid-connect",
+            "bearerOnly": true
+        },
+        {
+            "clientId": "report-reader",
+            "enabled": true,
+            "protocol": "openid-connect",
+            "publicClient": false,
+            "secret": "reader-client-secret",
+            "serviceAccountsEnabled": true,
+            "standardFlowEnabled": false,
+            "directAccessGrantsEnabled": false,
+            "fullScopeAllowed": true,
+            "defaultClientScopes": [],
+            "protocolMappers": [
+                {
+                    "name": "explicit-audience",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "config": {
+                        "included.custom.audience": "uptimerobot-api",
+                        "access.token.claim": "true",
+                        "id.token.claim": "false"
+                    }
+                },
+                {
+                    "name": "resource-roles",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-usermodel-client-role-mapper",
+                    "config": {
+                        "usermodel.clientRoleMapping.clientId": "uptimerobot-api",
+                        "claim.name": "resource_access.uptimerobot-api.roles",
+                        "jsonType.label": "String",
+                        "multivalued": "true",
+                        "access.token.claim": "true",
+                        "id.token.claim": "false"
+                    }
+                }
+            ]
+        },
+        {
+            "clientId": "report-observer",
+            "enabled": true,
+            "protocol": "openid-connect",
+            "publicClient": false,
+            "secret": "observer-client-secret",
+            "serviceAccountsEnabled": true,
+            "standardFlowEnabled": false,
+            "directAccessGrantsEnabled": false,
+            "fullScopeAllowed": true,
+            "defaultClientScopes": [],
+            "protocolMappers": [
+                {
+                    "name": "explicit-audience",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "config": {
+                        "included.custom.audience": "uptimerobot-api",
+                        "access.token.claim": "true",
+                        "id.token.claim": "false"
+                    }
+                },
+                {
+                    "name": "resource-roles",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-usermodel-client-role-mapper",
+                    "config": {
+                        "usermodel.clientRoleMapping.clientId": "uptimerobot-api",
+                        "claim.name": "resource_access.uptimerobot-api.roles",
+                        "jsonType.label": "String",
+                        "multivalued": "true",
+                        "access.token.claim": "true",
+                        "id.token.claim": "false"
+                    }
+                }
+            ]
+        },
+        {
+            "clientId": "report-other",
+            "enabled": true,
+            "protocol": "openid-connect",
+            "publicClient": false,
+            "secret": "other-client-secret",
+            "serviceAccountsEnabled": true,
+            "standardFlowEnabled": false,
+            "directAccessGrantsEnabled": false,
+            "fullScopeAllowed": true,
+            "defaultClientScopes": [],
+            "protocolMappers": [
+                {
+                    "name": "explicit-audience",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "config": {
+                        "included.custom.audience": "other-api",
+                        "access.token.claim": "true",
+                        "id.token.claim": "false"
+                    }
+                },
+                {
+                    "name": "resource-roles",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-usermodel-client-role-mapper",
+                    "config": {
+                        "usermodel.clientRoleMapping.clientId": "uptimerobot-api",
+                        "claim.name": "resource_access.uptimerobot-api.roles",
+                        "jsonType.label": "String",
+                        "multivalued": "true",
+                        "access.token.claim": "true",
+                        "id.token.claim": "false"
+                    }
+                }
+            ]
+        }
+    ],
+    "users": [
+        {
+            "username": "service-account-report-reader",
+            "enabled": true,
+            "serviceAccountClientId": "report-reader",
+            "clientRoles": {
+                "uptimerobot-api": [
+                    "REPORT_READ"
+                ]
+            }
+        },
+        {
+            "username": "service-account-report-observer",
+            "enabled": true,
+            "serviceAccountClientId": "report-observer",
+            "clientRoles": {
+                "uptimerobot-api": [
+                    "REPORT_OBSERVE"
+                ]
+            }
+        },
+        {
+            "username": "service-account-report-other",
+            "enabled": true,
+            "serviceAccountClientId": "report-other",
+            "clientRoles": {
+                "uptimerobot-api": [
+                    "REPORT_READ"
+                ]
+            }
+        }
+    ]
+}

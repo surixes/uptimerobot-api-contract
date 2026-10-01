@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -54,16 +55,27 @@ public class CheckEntity {
     @Column(name = "last_response_time_ms", nullable = false)
     private Integer lastResponseTimeMs;
 
+    @Column(name = "country_code", nullable = false, length = 2)
+    private String countryCode = "ZZ";
+
     @Version
     @Column(nullable = false)
     private Long version;
 
-    protected CheckEntity() {
-    }
+    protected CheckEntity() {}
 
-    public CheckEntity(UUID uuid, String name, String url, String method, Integer intervalSec,
-            Integer timeoutMs, Boolean enabled, Integer expectedStatusCode,
-            String expectedResponseContains, OffsetDateTime createdAt, OffsetDateTime updatedAt,
+    public CheckEntity(
+            UUID uuid,
+            String name,
+            String url,
+            String method,
+            Integer intervalSec,
+            Integer timeoutMs,
+            Boolean enabled,
+            Integer expectedStatusCode,
+            String expectedResponseContains,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt,
             Integer lastResponseTimeMs) {
         this.uuid = uuid;
         this.name = name;
@@ -169,6 +181,14 @@ public class CheckEntity {
 
     public void setLastResponseTimeMs(Integer lastResponseTimeMs) {
         this.lastResponseTimeMs = lastResponseTimeMs;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String value) {
+        countryCode = value == null ? "ZZ" : value;
     }
 
     public Long getVersion() {

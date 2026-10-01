@@ -1,15 +1,17 @@
 package edu.rutmiit.demo.uptimerobotapicontract.dto;
 
-import java.time.OffsetDateTime;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import java.time.OffsetDateTime;
 
 @Getter
 @Builder
@@ -21,6 +23,8 @@ public class CheckResponse extends RepresentationModel<CheckResponse> {
 
     @Schema(description = "Уникальный идентификатор чека", example = "1")
     private final Long id;
+
+    private final String countryCode;
 
     @Schema(description = "Имя чека", example = "service-check")
     private final String name;
@@ -52,7 +56,8 @@ public class CheckResponse extends RepresentationModel<CheckResponse> {
     @Schema(description = "Время последнего изменения чека")
     private final OffsetDateTime updatedAt;
 
-    @Schema(description = "Время ожидания ответа в секундах от ресурса в последний раз",
+    @Schema(
+            description = "Время ожидания ответа в секундах от ресурса в последний раз",
             example = "3")
     private final Integer lastResponseTimeMs;
 }

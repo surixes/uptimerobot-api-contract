@@ -28,6 +28,7 @@
     <name>api-rest [root aggregator]</name>
 
     <modules>
+        <module>uptimerobot-report-client</module>
         <module>uptimerobot-api-contract</module>
         <module>uptimerobot-events-contract</module>
         <module>uptimerobot-grpc-contract</module>
